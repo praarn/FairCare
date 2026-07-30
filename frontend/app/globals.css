@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #F5F7F3;
+  color: #12312B;
+}
+
+/* Rate-card perforation divider — nods to the ration-card / tariff-sheet
+   aesthetic instead of a plain <hr> */
+.perforated {
+  border: none;
+  border-top: 2px dashed #D8DED9;
+  position: relative;
+  margin: 1.5rem 0;
+}
+.perforated::before,
+.perforated::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #F5F7F3;
+  border: 2px dashed #D8DED9;
+}
+.perforated::before { left: -22px; }
+.perforated::after { right: -22px; }
+
+/* Stamped-seal look for official/empanelled badges */
+.stamp {
+  transform: rotate(-4deg);
+  border: 2px solid currentColor;
+  border-radius: 999px;
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid #0E6B5C;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

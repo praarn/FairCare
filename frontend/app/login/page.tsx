@@ -1,0 +1,90 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
+import { useLanguage } from "@/lib/language-context";
+
+export default function LoginPage() {
+  const { t } = useLanguage();
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      await login(email, password);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-6 max-w-sm mx-auto">
+      <h1 className="font-display text-2xl font-semibold text-ink text-center">
+        {t("auth.loginTitle")}
+      </h1>
+
+      <form
+        onSubmit={handleSubmit}
+        className="rounded-card border border-line bg-surface p-5 sm:p-6 shadow-card flex flex-col gap-4"
+      >
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-ink mb-1.5">
+            {t("auth.emailLabel")}
+          </label>
+          <input
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-card border border-line bg-surface px-4 py-3 text-base text-ink focus:border-primary"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-ink mb-1.5">
+            {t("auth.passwordLabel")}
+          </label>
+          <input
+            id="password"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-card border border-line bg-surface px-4 py-3 text-base text-ink focus:border-primary"
+          />
+        </div>
+
+        {error && <p className="text-sm text-alert font-medium">{error}</p>}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-card bg-primary hover:bg-primary-dark disabled:opacity-60 text-white font-semibold text-base py-3.5 transition-colors"
+        >
+          {t("auth.loginSubmit")}
+        </button>
+
+        <Link href="/forgot-password" className="text-sm text-primary text-center underline underline-offset-2">
+          {t("auth.forgotPasswordLink")}
+        </Link>
+      </form>
+
+      <p className="text-center text-sm text-ink-soft">
+        {t("auth.noAccount")}{" "}
+        <Link href="/signup" className="text-primary font-medium underline underline-offset-2">
+          {t("auth.signupLink")}
+        </Link>
+      </p>
+    </div>
+  );
+}

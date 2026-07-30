@@ -1,0 +1,238 @@
+[
+  {
+    "id": "t_appendectomy",
+    "name": "Appendectomy",
+    "name_hi": "अपेंडिक्स सर्जरी",
+    "category": "General Surgery",
+    "category_hi": "सामान्य सर्जरी",
+    "aliases": ["appendix surgery", "appendix removal", "laparoscopic appendectomy"],
+    "typical_duration": "1-2 days admission",
+    "description": "Surgical removal of the appendix, usually for acute appendicitis.",
+    "symptoms": [
+      "stomach pain right side",
+      "abdominal pain with fever",
+      "severe pain lower right abdomen",
+      "sharp belly pain right side"
+    ]
+  },
+  {
+    "id": "t_normal_delivery",
+    "name": "Normal Delivery",
+    "name_hi": "सामान्य प्रसव",
+    "category": "Maternity",
+    "category_hi": "प्रसूति",
+    "aliases": ["vaginal delivery", "normal birth"],
+    "typical_duration": "1-3 days admission",
+    "description": "Vaginal childbirth without surgical delivery.",
+    "symptoms": ["labor pain", "pregnancy full term", "contractions", "water broke pregnancy"]
+  },
+  {
+    "id": "t_c_section",
+    "name": "C-Section Delivery",
+    "name_hi": "सिजेरियन प्रसव",
+    "category": "Maternity",
+    "category_hi": "प्रसूति",
+    "aliases": ["cesarean", "caesarean section"],
+    "typical_duration": "3-5 days admission",
+    "description": "Surgical delivery of a baby through incisions in the abdomen and uterus.",
+    "symptoms": ["difficult labor", "pregnancy complications", "prolonged labor", "emergency delivery pregnancy"]
+  },
+  {
+    "id": "t_cataract",
+    "name": "Cataract Surgery",
+    "name_hi": "मोतियाबिंद सर्जरी",
+    "category": "Ophthalmology",
+    "category_hi": "नेत्र रोग",
+    "aliases": ["eye lens surgery", "cataract operation"],
+    "typical_duration": "Day care, 1 day",
+    "description": "Removal of the clouded natural eye lens and replacement with an artificial lens.",
+    "symptoms": ["blurry vision", "cloudy vision", "difficulty seeing at night", "foggy eyesight"]
+  },
+  {
+    "id": "t_knee_replacement",
+    "name": "Knee Replacement",
+    "name_hi": "घुटना प्रत्यारोपण",
+    "category": "Orthopedics",
+    "category_hi": "हड्डी रोग",
+    "aliases": ["knee arthroplasty", "TKR"],
+    "typical_duration": "5-7 days admission",
+    "description": "Surgical replacement of the knee joint with an artificial implant.",
+    "symptoms": ["knee pain", "joint pain when walking", "difficulty climbing stairs", "knee swelling stiffness"]
+  },
+  {
+    "id": "t_dialysis",
+    "name": "Dialysis Session",
+    "name_hi": "डायलिसिस सत्र",
+    "category": "Nephrology",
+    "category_hi": "गुर्दा रोग",
+    "aliases": ["hemodialysis", "kidney dialysis"],
+    "typical_duration": "3-4 hours per session",
+    "description": "A single hemodialysis session for patients with kidney failure.",
+    "symptoms": ["kidney failure", "swelling in legs", "fatigue and reduced urination", "low urine output kidney"]
+  },
+  {
+    "id": "t_hernia_repair",
+    "name": "Hernia Repair",
+    "name_hi": "हर्निया की सर्जरी",
+    "category": "General Surgery",
+    "category_hi": "सामान्य सर्जरी",
+    "aliases": ["hernia surgery", "hernioplasty", "laparoscopic hernia repair"],
+    "typical_duration": "1-2 days admission",
+    "description": "Surgical repair of a hernia, where tissue pushes through a weak spot in muscle.",
+    "symptoms": ["bulge in groin", "swelling in abdomen wall", "pain lifting heavy objects"]
+  },
+  {
+    "id": "t_gallbladder_removal",
+    "name": "Gallbladder Removal",
+    "name_hi": "पित्ताशय की सर्जरी",
+    "category": "General Surgery",
+    "category_hi": "सामान्य सर्जरी",
+    "aliases": ["cholecystectomy", "laparoscopic cholecystectomy", "gallstone surgery"],
+    "typical_duration": "1-2 days admission",
+    "description": "Surgical removal of the gallbladder, usually for gallstones.",
+    "symptoms": ["upper right abdomen pain after eating", "gallstone pain", "bloating and nausea after fatty food"]
+  },
+  {
+    "id": "t_tonsillectomy",
+    "name": "Tonsillectomy",
+    "name_hi": "टॉन्सिल की सर्जरी",
+    "category": "ENT",
+    "category_hi": "कान नाक गला",
+    "aliases": ["tonsil removal surgery"],
+    "typical_duration": "1 day admission",
+    "description": "Surgical removal of the tonsils, often for recurring throat infections.",
+    "symptoms": ["frequent sore throat", "difficulty swallowing recurring", "swollen tonsils"]
+  },
+  {
+    "id": "t_hysterectomy",
+    "name": "Hysterectomy",
+    "name_hi": "गर्भाशय की सर्जरी",
+    "category": "Gynecology",
+    "category_hi": "स्त्री रोग",
+    "aliases": ["uterus removal surgery"],
+    "typical_duration": "3-5 days admission",
+    "description": "Surgical removal of the uterus, for conditions like fibroids or heavy bleeding.",
+    "symptoms": ["heavy menstrual bleeding", "pelvic pain chronic", "uterine fibroids"]
+  },
+  {
+    "id": "t_angioplasty",
+    "name": "Angioplasty with Stent",
+    "name_hi": "एंजियोप्लास्टी",
+    "category": "Cardiology",
+    "category_hi": "हृदय रोग",
+    "aliases": ["coronary angioplasty", "stent placement", "PTCA"],
+    "typical_duration": "2-3 days admission",
+    "description": "A procedure to open blocked coronary arteries using a balloon and stent.",
+    "symptoms": ["chest pain", "chest tightness exertion", "shortness of breath heart"]
+  },
+  {
+    "id": "t_bypass_surgery",
+    "name": "Bypass Surgery (CABG)",
+    "name_hi": "बाईपास सर्जरी",
+    "category": "Cardiology",
+    "category_hi": "हृदय रोग",
+    "aliases": ["coronary artery bypass graft", "heart bypass surgery", "CABG"],
+    "typical_duration": "7-10 days admission",
+    "description": "Major heart surgery to reroute blood flow around blocked coronary arteries.",
+    "symptoms": ["severe chest pain heart", "blocked arteries diagnosed", "breathlessness with chest pain"]
+  },
+  {
+    "id": "t_hip_replacement",
+    "name": "Hip Replacement",
+    "name_hi": "कूल्हे का प्रत्यारोपण",
+    "category": "Orthopedics",
+    "category_hi": "हड्डी रोग",
+    "aliases": ["hip arthroplasty", "THR"],
+    "typical_duration": "5-7 days admission",
+    "description": "Surgical replacement of the hip joint with an artificial implant.",
+    "symptoms": ["hip pain", "difficulty walking hip", "hip stiffness limited movement"]
+  },
+  {
+    "id": "t_fracture_fixation",
+    "name": "Fracture Fixation Surgery",
+    "name_hi": "फ्रैक्चर सर्जरी",
+    "category": "Orthopedics",
+    "category_hi": "हड्डी रोग",
+    "aliases": ["ORIF surgery", "broken bone surgery", "plate and screws surgery"],
+    "typical_duration": "2-4 days admission",
+    "description": "Surgery to fix a broken bone using plates, screws, or rods.",
+    "symptoms": ["broken bone after fall", "severe limb pain after accident", "unable to move limb after injury"]
+  },
+  {
+    "id": "t_kidney_stone_removal",
+    "name": "Kidney Stone Removal",
+    "name_hi": "गुर्दे की पथरी का ऑपरेशन",
+    "category": "Urology",
+    "category_hi": "मूत्र रोग",
+    "aliases": ["lithotripsy", "RIRS", "PCNL", "kidney stone surgery"],
+    "typical_duration": "1-3 days admission",
+    "description": "Procedure to break up or remove kidney stones.",
+    "symptoms": ["severe back pain one side", "blood in urine", "kidney stone pain"]
+  },
+  {
+    "id": "t_piles_surgery",
+    "name": "Piles Surgery",
+    "name_hi": "बवासीर की सर्जरी",
+    "category": "General Surgery",
+    "category_hi": "सामान्य सर्जरी",
+    "aliases": ["hemorrhoidectomy", "hemorrhoid surgery"],
+    "typical_duration": "1-2 days admission",
+    "description": "Surgical treatment for hemorrhoids (piles).",
+    "symptoms": ["bleeding during bowel movement", "rectal pain", "piles swelling"]
+  },
+  {
+    "id": "t_thyroid_surgery",
+    "name": "Thyroid Surgery",
+    "name_hi": "थायराइड की सर्जरी",
+    "category": "General Surgery",
+    "category_hi": "सामान्य सर्जरी",
+    "aliases": ["thyroidectomy"],
+    "typical_duration": "2-3 days admission",
+    "description": "Surgical removal of all or part of the thyroid gland.",
+    "symptoms": ["neck swelling", "thyroid nodule diagnosed", "difficulty swallowing neck lump"]
+  },
+  {
+    "id": "t_root_canal",
+    "name": "Root Canal Treatment",
+    "name_hi": "रूट कैनाल उपचार",
+    "category": "Dental",
+    "category_hi": "दंत चिकित्सा",
+    "aliases": ["RCT", "root canal surgery"],
+    "typical_duration": "Day care, 1-2 sittings",
+    "description": "Dental procedure to treat infection at the center of a tooth.",
+    "symptoms": ["severe tooth pain", "tooth sensitive hot cold", "swollen gum near tooth"]
+  },
+  {
+    "id": "t_chemotherapy_session",
+    "name": "Chemotherapy Session",
+    "name_hi": "कीमोथेरेपी सत्र",
+    "category": "Oncology",
+    "category_hi": "कैंसर रोग",
+    "aliases": ["chemo session", "cancer chemotherapy cycle"],
+    "typical_duration": "Few hours per cycle",
+    "description": "A single chemotherapy cycle for cancer treatment.",
+    "symptoms": ["diagnosed with cancer needing chemo", "tumor diagnosed treatment"]
+  },
+  {
+    "id": "t_typhoid_treatment",
+    "name": "Typhoid Fever Hospitalization",
+    "name_hi": "टाइफाइड बुखार का इलाज",
+    "category": "General Medicine",
+    "category_hi": "सामान्य चिकित्सा",
+    "aliases": ["typhoid treatment", "enteric fever treatment"],
+    "typical_duration": "3-7 days admission",
+    "description": "Hospitalization and IV antibiotic treatment for typhoid fever.",
+    "symptoms": ["prolonged high fever", "typhoid diagnosed", "fever with stomach pain weakness"]
+  },
+  {
+    "id": "t_dengue_treatment",
+    "name": "Dengue Fever Hospitalization",
+    "name_hi": "डेंगू बुखार का इलाज",
+    "category": "General Medicine",
+    "category_hi": "सामान्य चिकित्सा",
+    "aliases": ["dengue treatment", "dengue admission"],
+    "typical_duration": "3-6 days admission",
+    "description": "Hospitalization and supportive care for dengue fever, including platelet monitoring.",
+    "symptoms": ["high fever with body ache", "low platelet count", "dengue diagnosed"]
+  }
+]
