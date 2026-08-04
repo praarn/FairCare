@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isPublic = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
@@ -20,7 +20,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Run on every route except static assets, images, and favicon —
-  // those don't need auth gating and gating them would break the app shell.
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

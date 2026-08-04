@@ -1,6 +1,14 @@
 import { Treatment, PredictCostResponse, HospitalOut, SchemeResult, User } from "./types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+// IMPORTANT: default to the explicit IPv4 loopback address, not "localhost".
+// This file's fetch() calls run both in the browser AND server-side (e.g.
+// app/layout.tsx calls fetchMe() during SSR on every request). On Windows,
+// Node resolves "localhost" to the IPv6 address (::1) first. uvicorn only
+// binds to the IPv4 loopback (127.0.0.1), so every server-side request tries
+// ::1:8000, gets nothing, and waits out a multi-second timeout before ever
+// reaching the real backend — this is what causes the wildly inconsistent
+// multi-second page load times. Using 127.0.0.1 directly skips that entirely.
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
 
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {

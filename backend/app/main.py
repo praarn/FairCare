@@ -13,9 +13,17 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# Browsers treat "localhost" and "127.0.0.1" as different origins even though
+# they're the same machine, so the frontend must be allowed from both — plus
+# the loopback interface itself, in case a server-side fetch (e.g. from
+# Next.js SSR in layout.tsx) ever sends an Origin header.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://[::1]:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

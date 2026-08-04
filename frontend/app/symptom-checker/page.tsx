@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { searchTreatmentsBySymptom } from "@/lib/api";
-import { Treatment } from "@/lib/types";
+import { Treatment, CITIES } from "@/lib/types";
 import { useLanguage } from "@/lib/language-context";
 
 export default function SymptomCheckerPage() {
@@ -11,6 +11,12 @@ export default function SymptomCheckerPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Treatment[] | null>(null);
   const [loading, setLoading] = useState(false);
+  // Every "Get estimate" link needs a city to pass to /results (which
+  // requires city or state). This used to be hardcoded to "Delhi" for
+  // every user regardless of where they actually are — that silently gave
+  // everyone a Delhi-priced estimate. Ask for it instead, same as the
+  // home and compare pages already do.
+  const [city, setCity] = useState<string>(CITIES[0]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,6 +71,23 @@ export default function SymptomCheckerPage() {
           <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
             {t("symptom.resultsTitle")}
           </p>
+          {results.length > 0 && (
+            <div className="flex items-center gap-2">
+              <label htmlFor="symptom-city-select" className="text-sm text-ink-soft shrink-0">
+                {t("home.cityLabel")}
+              </label>
+              <select
+                id="symptom-city-select"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="flex-1 rounded-card border border-line bg-surface px-3 py-2 text-sm text-ink focus:border-primary"
+              >
+                {CITIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+          )}
           {results.length === 0 ? (
             <div className="rounded-card border border-line bg-surface p-6 text-center text-ink-soft">
               {t("symptom.noResults")}
@@ -80,7 +103,7 @@ export default function SymptomCheckerPage() {
                   <div className="text-xs text-ink-soft">{tr.category}</div>
                 </div>
                 <Link
-                  href={`/results?treatment_id=${tr.id}&city=Delhi`}
+                  href={`/results?treatment_id=${tr.id}&city=${encodeURIComponent(city)}`}
                   className="shrink-0 text-sm text-primary font-medium underline underline-offset-2"
                 >
                   {t("symptom.getEstimate")} →
