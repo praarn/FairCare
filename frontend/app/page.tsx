@@ -198,6 +198,17 @@ export default function HomePage() {
             }
           />
           <FeatureCard
+            href="/episode"
+            accent="seal"
+            title={t("nav.episode")}
+            description={t("home.cardEpisodeDesc")}
+            icon={
+              <svg {...ICON_PROPS} aria-hidden>
+                <path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+              </svg>
+            }
+          />
+          <FeatureCard
             href="/methodology"
             accent="seal"
             title={t("nav.methodology")}

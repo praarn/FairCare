@@ -43,7 +43,12 @@ def _verify_password(password: str, salt_hex: str, expected_hash_hex: str) -> bo
 
 
 def _public_user(user: User) -> dict:
-    return {"id": user.id, "name": user.name, "email": user.email}
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "is_admin": bool(user.is_admin),
+    }
 
 
 # ---------- public API used by the router ----------

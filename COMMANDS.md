@@ -41,6 +41,20 @@ docker compose exec backend python -m app.seed --fresh   # wipe + re-seed refere
 docker compose exec db psql -U sahaj -d sahaj      # psql shell
 ```
 
+### Grant a user admin access (contribution review)
+
+`/contribute/review` and the `GET/POST /api/contributions` review endpoints require
+`users.is_admin = true`. Sign the account up through the app first, then:
+
+```bash
+make admin email=you@example.com
+# or directly:
+docker compose exec db psql -U sahaj -d sahaj \
+  -c "UPDATE users SET is_admin = true WHERE email = 'you@example.com';"
+```
+
+Log out and back in so the fresh session carries the flag.
+
 ---
 
 ## 2. Run without Docker (bare metal)
@@ -153,4 +167,36 @@ curl -X POST http://localhost:8000/api/predict-cost \
 curl "http://localhost:8000/api/hospitals?treatment_id=t_dialysis&city=Mumbai"
 curl "http://localhost:8000/api/schemes/eligible?annual_household_income=300000&state=Maharashtra&is_govt_employee_or_pensioner=false"
 curl "http://localhost:8000/api/treatments/search-symptoms?q=chest%20pain%20and%20shortness%20of%20breath"
+```
+
+### New feature endpoints
+
+```bash
+# Multi-treatment "episode" estimate (no auth)
+curl -X POST http://localhost:8000/api/estimate-episode \
+  -H "Content-Type: application/json" \
+  -d '{"items":[{"treatment_id":"t_dialysis","quantity":12},{"treatment_id":"t_knee_replacement","quantity":1}],"city":"Mumbai"}'
+
+# Crowd-sourced contribution (anonymous submit)
+curl -X POST http://localhost:8000/api/contributions \
+  -H "Content-Type: application/json" \
+  -d '{"treatment_id":"t_dialysis","city":"Mumbai","amount":42000}'
+
+# Admin review (needs a bearer token for an is_admin account)
+TOK=... ; CID=...
+curl "http://localhost:8000/api/contributions?status=pending" -H "Authorization: Bearer $TOK"
+curl -X POST "http://localhost:8000/api/contributions/$CID/approve" \
+  -H "Authorization: Bearer $TOK" -H "Content-Type: application/json" \
+  -d '{"treatment_id":"t_dialysis","city":"Mumbai","state":"Maharashtra","hospital_type":"private_mid"}'
+
+# Saved estimates (needs any logged-in bearer token)
+curl -X POST http://localhost:8000/api/saved-estimates \
+  -H "Authorization: Bearer $TOK" -H "Content-Type: application/json" \
+  -d '{"treatment_id":"t_knee_replacement","city":"Mumbai","label":"Mrs. Rao"}'
+curl http://localhost:8000/api/saved-estimates -H "Authorization: Bearer $TOK"
+
+# AI estimate explainer (needs GROQ_API_KEY set)
+curl -X POST http://localhost:8000/api/multimodal/explain-estimate \
+  -H "Content-Type: application/json" \
+  -d '{"treatment_id":"t_knee_replacement","city":"Mumbai"}'
 ```

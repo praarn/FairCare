@@ -2,6 +2,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  is_admin?: boolean;
 }
 
 export interface Treatment {
@@ -136,8 +137,10 @@ export interface SchemeResult {
 export interface MultimodalStatus {
   vision: boolean;
   transcription: boolean;
+  text: boolean;
   vision_model: string | null;
   transcription_model: string | null;
+  text_model: string | null;
 }
 
 export interface TranscriptionResult {
@@ -168,5 +171,136 @@ export interface BillAnalysisResult {
   matched_treatment: Treatment | null;
   our_estimate: Estimate | null;
   verdict: BillVerdict;
+  disclaimer: string;
+}
+
+// ---------- Estimate explainer ----------
+
+export interface EstimateExplanation {
+  summary: string;
+  line_item_notes: { item: string; note: string }[];
+  questions_to_ask: string[];
+  scheme_hint: string | null;
+  disclaimer: string;
+}
+
+// ---------- Crowd-sourced contributions ----------
+
+export interface ContributionInput {
+  amount: number;
+  treatment_id?: string;
+  city?: string;
+  state?: string;
+  hospital_type?: string;
+  hospital_name?: string;
+  line_items?: BillLineItem[];
+  source_note?: string;
+}
+
+export interface Contribution {
+  id: string;
+  created_at: string | null;
+  user_id: string | null;
+  treatment_id: string | null;
+  city: string | null;
+  state: string | null;
+  hospital_type: string | null;
+  hospital_name: string | null;
+  amount: number;
+  line_items: BillLineItem[];
+  source_note: string;
+  status: "pending" | "approved" | "rejected";
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  promoted_cost_record_id: string | null;
+}
+
+export interface ContributionApproveInput {
+  treatment_id?: string;
+  city?: string;
+  state?: string;
+  hospital_type?: string;
+  cost_min?: number;
+  cost_max?: number;
+}
+
+// ---------- Saved estimates ----------
+
+export interface EstimateDrift {
+  current_avg: number;
+  delta_pct: number;
+  direction: "up" | "down" | "flat";
+}
+
+export interface SavedEstimate {
+  id: string;
+  created_at: string | null;
+  treatment_id: string;
+  treatment_name: string;
+  city: string | null;
+  state: string | null;
+  hospital_type: string | null;
+  label: string | null;
+  note: string;
+  cost_min: number;
+  cost_avg: number;
+  cost_max: number;
+  confidence_label: "low" | "medium" | "high";
+  lang: string;
+  drift: EstimateDrift | null;
+}
+
+export interface SavedEstimateInput {
+  treatment_id: string;
+  city?: string;
+  state?: string;
+  hospital_type?: string;
+  label?: string;
+  note?: string;
+  lang?: string;
+}
+
+// ---------- Episode estimator ----------
+
+export interface EpisodeItemInput {
+  treatment_id: string;
+  quantity: number;
+}
+
+export interface EpisodeRequestInput {
+  items: EpisodeItemInput[];
+  city?: string;
+  state?: string;
+  hospital_type?: string;
+  lang?: string;
+  annual_household_income?: number;
+  is_govt_employee_or_pensioner?: boolean;
+}
+
+export interface EpisodeLine {
+  treatment: Treatment;
+  quantity: number;
+  estimate: Estimate;
+  line_min: number;
+  line_avg: number;
+  line_max: number;
+}
+
+export interface EpisodeSkipped {
+  treatment_id: string;
+  quantity: number;
+  reason: string;
+}
+
+export interface EpisodeResult {
+  lines: EpisodeLine[];
+  skipped: EpisodeSkipped[];
+  totals: {
+    cost_min: number;
+    cost_avg: number;
+    cost_max: number;
+    confidence_label: "low" | "medium" | "high";
+  };
+  eligible_schemes: { scheme_id: string; name: string; coverage_details: string }[];
   disclaimer: string;
 }

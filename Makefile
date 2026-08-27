@@ -5,7 +5,7 @@ COMPOSE ?= docker compose
 PY ?= python
 
 .DEFAULT_GOAL := help
-.PHONY: help up down logs build rebuild ps psql migrate revision seed \
+.PHONY: help up down logs build rebuild ps psql migrate revision seed admin \
         backend-install backend-test lint fmt dev-backend dev-frontend frontend-install
 
 help: ## Show this help
@@ -38,6 +38,10 @@ migrate: ## Run alembic migrations inside the backend container
 
 seed: ## Re-run the seed loader inside the backend container
 	$(COMPOSE) exec backend $(PY) -m app.seed
+
+admin: ## Grant admin (contribution review) to a user:  make admin email=you@example.com
+	$(COMPOSE) exec db psql -U $${POSTGRES_USER:-sahaj} -d $${POSTGRES_DB:-sahaj} \
+		-c "UPDATE users SET is_admin = true WHERE email = '$(email)';"
 
 ## ---------- backend (bare metal) ----------
 backend-install: ## Install backend + dev deps into backend/venv

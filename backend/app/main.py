@@ -13,7 +13,17 @@ from app.db.session import engine
 from app.logging_config import configure_logging, get_logger
 from app.middleware import RequestIDMiddleware
 from app.rate_limit import limiter
-from app.routers import auth, hospitals, multimodal, predict, schemes, treatments
+from app.routers import (
+    auth,
+    contributions,
+    episode,
+    hospitals,
+    multimodal,
+    predict,
+    saved,
+    schemes,
+    treatments,
+)
 
 configure_logging()
 log = get_logger("sahaj.app")
@@ -119,6 +129,9 @@ app.include_router(hospitals.router)
 app.include_router(schemes.router)
 app.include_router(auth.router)
 app.include_router(multimodal.router)
+app.include_router(contributions.router)
+app.include_router(saved.router)
+app.include_router(episode.router)
 
 
 @app.get("/api/health")

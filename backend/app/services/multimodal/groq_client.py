@@ -88,6 +88,46 @@ def chat_vision(
         raise GroqUnavailable("Unexpected response shape from Groq vision.") from exc
 
 
+def chat_text(
+    *,
+    prompt: str,
+    model: str | None = None,
+    force_json: bool = True,
+) -> str:
+    """Text-only chat completion (no image). Used by the estimate explainer.
+
+    Same guarantees as ``chat_vision``: ``temperature=0``, one retry on a 5xx,
+    optional strict JSON response format. Nothing here computes money — the
+    caller passes in the already-computed figures for the model to describe.
+    """
+    model = model or settings.groq_text_model
+    payload: dict[str, Any] = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0,
+        "max_tokens": 1200,
+    }
+    if force_json:
+        payload["response_format"] = {"type": "json_object"}
+
+    try:
+        with _client() as client:
+            resp = client.post("/chat/completions", json=payload)
+        if resp.status_code >= 500:
+            with _client() as client:
+                resp = client.post("/chat/completions", json=payload)
+        resp.raise_for_status()
+    except httpx.HTTPError as exc:
+        log.warning("groq_text_failed", error=str(exc), model=model)
+        raise GroqUnavailable(f"Groq text request failed: {exc}") from exc
+
+    data = resp.json()
+    try:
+        return data["choices"][0]["message"]["content"]
+    except (KeyError, IndexError) as exc:  # pragma: no cover - upstream shape drift
+        raise GroqUnavailable("Unexpected response shape from Groq text.") from exc
+
+
 def transcribe(
     *,
     file_bytes: bytes,

@@ -33,6 +33,14 @@ export default function Header() {
             header just carries the essentials: language + account. */}
         {!isAuthRoute && (
           <div className="flex items-center gap-3">
+            {user?.is_admin && (
+              <Link
+                href="/contribute/review"
+                className="text-sm font-medium text-primary hover:text-primary-dark underline underline-offset-2 hidden sm:inline"
+              >
+                {t("nav.adminReview")}
+              </Link>
+            )}
             <LanguageDropdown />
             {user && (
               <div className="flex items-center gap-2 text-sm font-medium">

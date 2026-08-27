@@ -12,6 +12,8 @@ import InsuranceCoverageEstimator from "@/components/InsuranceCoverageEstimator"
 import RecordHistory from "@/components/RecordHistory";
 import ShareEstimate from "@/components/ShareEstimate";
 import ReadAloudButton from "@/components/ReadAloudButton";
+import SaveEstimateButton from "@/components/SaveEstimateButton";
+import EstimateExplainer from "@/components/EstimateExplainer";
 import { t, hospitalTypeLabel, parseLang } from "@/lib/i18n";
 
 export default async function ResultsPage({
@@ -152,6 +154,20 @@ export default async function ResultsPage({
       <ShareEstimate whatsappText={whatsappText} />
 
       <div className="print:hidden flex flex-col gap-6">
+        <SaveEstimateButton
+          treatmentId={treatment_id}
+          city={city}
+          state={state}
+          hospitalType={hospital_type || undefined}
+        />
+
+        <EstimateExplainer
+          treatmentId={treatment_id}
+          city={city}
+          state={state}
+          hospitalType={hospital_type || undefined}
+        />
+
         <PaymentPlanEstimator amount={data.estimate.cost_avg} />
 
         <CostOfCareBreakdown procedureCost={data.estimate.cost_avg} />

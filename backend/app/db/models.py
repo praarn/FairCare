@@ -11,12 +11,14 @@ from datetime import UTC, datetime
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     DateTime,
     Float,
     ForeignKey,
     Integer,
     String,
     Text,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -132,6 +134,9 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow
     )
+    is_admin: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default=text("false"), nullable=False
+    )
 
 
 class AuthSession(Base):
@@ -165,3 +170,62 @@ class BillAnalysis(Base):
     extracted: Mapped[dict] = mapped_column(JSON, default=dict)
     verdict: Mapped[str] = mapped_column(String(16), default="unknown")
     our_cost_avg: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+
+class CostContribution(Base):
+    """A user-submitted bill amount, pending admin review.
+
+    On approval an admin promotes it into a real ``cost_records`` row. Like
+    ``BillAnalysis`` this deliberately keeps no ForeignKeys and plain string
+    ids so the same metadata builds the SQLite test schema.
+    """
+
+    __tablename__ = "cost_contributions"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow
+    )
+    user_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    treatment_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    city: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    state: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    hospital_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    hospital_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    amount: Mapped[float] = mapped_column(Float)
+    line_items: Mapped[list] = mapped_column(JSON, default=list)
+    source_note: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(
+        String(16), default="pending", server_default=text("'pending'"), nullable=False
+    )
+    reviewed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    reviewed_by: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    promoted_cost_record_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+
+class SavedEstimate(Base):
+    """A logged-in user's saved cost estimate. The money columns are a
+    snapshot taken (server-side) at save time; drift vs the live estimate is
+    computed on read."""
+
+    __tablename__ = "saved_estimates"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(32), index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow
+    )
+    treatment_id: Mapped[str] = mapped_column(String(64))
+    treatment_name: Mapped[str] = mapped_column(String(200))
+    city: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    state: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    hospital_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    label: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    note: Mapped[str] = mapped_column(Text, default="")
+    cost_min: Mapped[float] = mapped_column(Float)
+    cost_avg: Mapped[float] = mapped_column(Float)
+    cost_max: Mapped[float] = mapped_column(Float)
+    confidence_label: Mapped[str] = mapped_column(String(16), default="low")
+    lang: Mapped[str] = mapped_column(String(8), default="en")

@@ -7,6 +7,14 @@ import {
   MultimodalStatus,
   TranscriptionResult,
   BillAnalysisResult,
+  EstimateExplanation,
+  Contribution,
+  ContributionInput,
+  ContributionApproveInput,
+  SavedEstimate,
+  SavedEstimateInput,
+  EpisodeRequestInput,
+  EpisodeResult,
 } from "./types";
 
 // This file's fetch() calls run both in the browser AND server-side (e.g.
@@ -213,4 +221,120 @@ export async function transcribeAudio(
     cache: "no-store",
   });
   return handle<TranscriptionResult>(res);
+}
+
+export async function explainEstimate(params: {
+  treatment_id: string;
+  city?: string;
+  state?: string;
+  hospital_type?: string;
+  lang?: string;
+  line_items?: { description: string; amount: number | null }[];
+}): Promise<EstimateExplanation> {
+  const res = await fetch(`${API_BASE}/api/multimodal/explain-estimate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(params),
+    cache: "no-store",
+  });
+  return handle<EstimateExplanation>(res);
+}
+
+// ---------- Crowd-sourced contributions ----------
+
+export async function submitContribution(
+  payload: ContributionInput,
+  token?: string
+): Promise<{ status: string; id: string }> {
+  const res = await fetch(`${API_BASE}/api/contributions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  return handle(res);
+}
+
+export async function fetchContributions(
+  token: string,
+  status: string = "pending"
+): Promise<Contribution[]> {
+  const res = await fetch(
+    `${API_BASE}/api/contributions?status=${encodeURIComponent(status)}`,
+    { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
+  );
+  return handle<Contribution[]>(res);
+}
+
+export async function approveContribution(
+  token: string,
+  id: string,
+  overrides: ContributionApproveInput
+): Promise<{ contribution: Contribution; cost_record_id: string }> {
+  const res = await fetch(`${API_BASE}/api/contributions/${id}/approve`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(overrides),
+    cache: "no-store",
+  });
+  return handle(res);
+}
+
+export async function rejectContribution(token: string, id: string): Promise<Contribution> {
+  const res = await fetch(`${API_BASE}/api/contributions/${id}/reject`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  return handle<Contribution>(res);
+}
+
+// ---------- Saved estimates ----------
+
+export async function saveEstimate(
+  token: string,
+  payload: SavedEstimateInput
+): Promise<SavedEstimate> {
+  const res = await fetch(`${API_BASE}/api/saved-estimates`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  return handle<SavedEstimate>(res);
+}
+
+export async function fetchSavedEstimates(token: string): Promise<SavedEstimate[]> {
+  const res = await fetch(`${API_BASE}/api/saved-estimates`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  return handle<SavedEstimate[]>(res);
+}
+
+export async function deleteSavedEstimate(token: string, id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/saved-estimates/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok && res.status !== 204) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Request failed (${res.status})`);
+  }
+}
+
+// ---------- Episode estimator ----------
+
+export async function estimateEpisode(payload: EpisodeRequestInput): Promise<EpisodeResult> {
+  const res = await fetch(`${API_BASE}/api/estimate-episode`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  return handle<EpisodeResult>(res);
 }

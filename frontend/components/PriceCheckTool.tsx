@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { formatINR } from "@/lib/format";
 import { useLanguage } from "@/lib/language-context";
-import { analyzeBill, multimodalStatus } from "@/lib/api";
+import { analyzeBill, multimodalStatus, submitContribution } from "@/lib/api";
+import { getAuthToken } from "@/lib/token";
 import type { BillLineItem } from "@/lib/types";
 
 export default function PriceCheckTool({
@@ -27,6 +28,13 @@ export default function PriceCheckTool({
   const [billItems, setBillItems] = useState<BillLineItem[] | null>(null);
   const [billError, setBillError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+
+  // ----- optional: contribute this bill's amount back -----
+  const [billTotal, setBillTotal] = useState<number | null>(null);
+  const [billHospitalName, setBillHospitalName] = useState<string | null>(null);
+  const [contributeState, setContributeState] = useState<
+    "idle" | "sending" | "done" | "error"
+  >("idle");
 
   useEffect(() => {
     let cancelled = false;
@@ -52,18 +60,43 @@ export default function PriceCheckTool({
     setAnalyzing(true);
     setBillError(null);
     setBillItems(null);
+    setBillTotal(null);
+    setBillHospitalName(null);
+    setContributeState("idle");
     try {
       const res = await analyzeBill(file, { city, treatment_id: treatmentId, lang });
       const total = res.effective_total ?? res.extracted.total_amount;
       setBillItems(res.extracted.line_items ?? []);
+      setBillHospitalName(res.extracted.hospital_name ?? null);
       if (total != null) {
         setQuote(String(total));
         setChecked(total);
+        setBillTotal(total);
       }
     } catch {
       setBillError(t("priceCheck.uploadFailed"));
     } finally {
       setAnalyzing(false);
+    }
+  }
+
+  async function handleContribute() {
+    if (billTotal == null) return;
+    setContributeState("sending");
+    try {
+      await submitContribution(
+        {
+          amount: billTotal,
+          treatment_id: treatmentId,
+          city,
+          hospital_name: billHospitalName ?? undefined,
+          line_items: billItems ?? undefined,
+        },
+        getAuthToken() ?? undefined
+      );
+      setContributeState("done");
+    } catch {
+      setContributeState("error");
     }
   }
 
@@ -145,6 +178,34 @@ export default function PriceCheckTool({
             ))}
           </ul>
           <p className="text-[11px] text-ink-soft mt-2 leading-relaxed">{t("priceCheck.llmNote")}</p>
+        </div>
+      )}
+
+      {billTotal != null && (
+        <div className="rounded-card border border-seal/40 bg-seal-light px-4 py-3">
+          {contributeState === "done" ? (
+            <p className="text-xs text-ink font-medium">{t("contribute.done")}</p>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-ink">{t("contribute.prompt")}</p>
+              <p className="text-[11px] text-ink-soft mt-1 leading-relaxed">
+                {t("contribute.explainer")}
+              </p>
+              {contributeState === "error" && (
+                <p className="text-xs text-alert font-medium mt-1.5">{t("contribute.failed")}</p>
+              )}
+              <button
+                type="button"
+                onClick={handleContribute}
+                disabled={contributeState === "sending"}
+                className="mt-2 rounded-card bg-seal hover:bg-seal/90 text-white font-semibold text-xs px-4 py-2 transition-colors disabled:opacity-60"
+              >
+                {contributeState === "sending"
+                  ? t("contribute.sending")
+                  : t("contribute.submit")}
+              </button>
+            </>
+          )}
         </div>
       )}
 

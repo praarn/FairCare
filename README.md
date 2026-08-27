@@ -23,11 +23,14 @@ The multimodal layer does not change this. When you upload a photo of a bill, a 
 - **Symptom checker** — strict F1-scored symptom-to-treatment matching that returns nothing rather than a weak guess, always paired with a medical disclaimer
 - **Hospital finder** — filter by treatment / city / type, government-first ranking or "budget mode", empanelled-status badge, embedded OpenStreetMap location
 - **Government scheme eligibility** — deterministic rule evaluation across PM-JAY, CGHS, and 7 state schemes, with a plain-language reason, coverage details, application steps, and official links
+- **Episode estimator** — add several treatments (with per-treatment session counts) for one combined min/avg/max, a per-line breakdown, a printable view, and — with household details — a list of schemes you may be eligible for
+- **Crowd-sourced cost data** — from the bill-photo flow a user can contribute that bill's amount; an admin reviews it at `/contribute/review` and, on approval, it becomes a sourced `cost_records` row (`sample_size = 1`, clearly labelled as a single self-reported point)
 - **Multimodal (Groq)**
   - **Bill / prescription photo** → structured line items + total, cross-checked against our sourced fair-range for that treatment and city
   - **Voice input** → the symptom checker and treatment search accept speech; the browser Web Speech API is tried first, with Groq Whisper as a server-side fallback for browsers that lack it
-  - Both degrade cleanly: with no `GROQ_API_KEY` set, the features simply hide and everything else keeps working
-- **Accounts & history** — signup / login with PBKDF2-hashed passwords and server-side sessions (now DB-backed); locally-saved estimate history for quick revisits without an account
+  - **Estimate explainer** → a plain-language, bilingual read of an estimate our rule-based service already computed (which line items are large/small shares, questions to ask the hospital, a scheme hint) — the model is handed only our numbers and is forbidden from inventing any figure
+  - All degrade cleanly: with no `GROQ_API_KEY` set, the features simply hide and everything else keeps working
+- **Accounts & history** — signup / login with PBKDF2-hashed passwords and server-side sessions (DB-backed); an `is_admin` flag gates the contribution-review surface; **saved estimates** are stored per-account with a label/note and a drift indicator ("typical cost +6% since you saved this"), alongside the local, no-account "recently viewed" list
 - **8-language i18n** — English, Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, with compile-time-checked translation keys
 - **Methodology page** — a static, human-readable explanation of the cost tiers, confidence scoring, and eligibility rules
 
@@ -121,9 +124,14 @@ Edit the base-rate table / multipliers in `backend/scripts/generate_seed_costs.p
 | GET | `/api/schemes/eligible?annual_household_income=&state=&is_govt_employee_or_pensioner=` | Rule-based scheme eligibility check |
 | POST | `/api/auth/signup` · `/login` · `/logout` · `/forgot-password` · `/reset-password` | Accounts + sessions (rate-limited) |
 | GET | `/api/auth/me` | Current user from bearer token |
-| GET | `/api/multimodal/status` | Whether vision / transcription are available (i.e. a Groq key is set) |
+| GET | `/api/multimodal/status` | Whether vision / transcription / text explainer are available (i.e. a Groq key is set) |
 | POST | `/api/multimodal/analyze-bill` | Multipart image → extracted line items + our fair-range verdict |
 | POST | `/api/multimodal/transcribe` | Multipart audio → transcript (Groq Whisper) |
+| POST | `/api/multimodal/explain-estimate` | Plain-language explanation of an estimate we recompute server-side (Groq text model; no figure invented) |
+| POST | `/api/estimate-episode` | Combined estimate for several treatments × session counts, + eligible schemes |
+| POST | `/api/contributions` | Submit a bill amount (anonymous or attributed) for review |
+| GET · POST | `/api/contributions` · `/{id}/approve` · `/{id}/reject` | Admin-only (`is_admin`) review + promotion into `cost_records` |
+| POST · GET · DELETE | `/api/saved-estimates` | Per-user saved estimates with drift-on-read (auth required) |
 
 Interactive docs at `/docs` (Swagger) and `/redoc`.
 
@@ -138,8 +146,10 @@ Interactive docs at `/docs` (Swagger) and `/redoc`.
 | `national_references` | Cited PM-JAY / CGHS national package rates (flattened), for the subset of treatments with a public figure |
 | `hospitals` | Hospital directory: name, type, city/state, lat/lng, contact, treatments offered, empanelled schemes, rating |
 | `schemes` | Government scheme catalogue: eligibility rules, coverage, application steps, official link, last-verified date |
-| `users`, `auth_sessions`, `password_reset_tokens` | Accounts + server-side sessions (PBKDF2, 7-day session TTL, 1-hour reset TTL) |
+| `users`, `auth_sessions`, `password_reset_tokens` | Accounts + server-side sessions (PBKDF2, 7-day session TTL, 1-hour reset TTL); `users.is_admin` gates contribution review |
 | `bill_analyses` | Structured summary of each multimodal bill analysis — **never** stores the uploaded image |
+| `cost_contributions` | User-submitted bill amounts pending admin review; on approval a `cost_records` row (`source = "user_<id>"`, `sample_size = 1`) is created |
+| `saved_estimates` | Per-user saved estimates: snapshot of min/avg/max + confidence at save time; live drift computed on read |
 
 ---
 
@@ -180,7 +190,8 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push / PR:
 - **Multimodal needs a Groq key** — without `GROQ_API_KEY` the bill-photo button and server voice fallback hide; browser Web Speech voice still works
 - **Bill images are processed in memory and discarded** — only a structured summary row is kept, no image, no raw PHI blob
 - **Password-reset in development** returns the token in the API response (no mail service); in `APP_ENV=production` it is only logged
-- **History is local-only** — not synced to an account or backend
+- **"Recently viewed" history is local-only** — the per-account **saved estimates** are DB-backed, but the quick-revisit list still lives in `localStorage`
+- **Contribution approval trusts the reviewer** — an approved bill becomes a `sample_size = 1` row; there is no automatic outlier rejection, so review carefully
 
 ---
 

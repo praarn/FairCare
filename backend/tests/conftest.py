@@ -18,12 +18,40 @@ from sqlalchemy.pool import StaticPool  # noqa: E402
 from app.db import models  # noqa: E402,F401
 from app.db.base import Base  # noqa: E402
 from app.db.models import (  # noqa: E402
+    AuthSession,
+    CostContribution,
     CostRecord,
     Hospital,
     NationalReference,
+    PasswordResetToken,
+    SavedEstimate,
     Scheme,
     Treatment,
+    User,
 )
+
+# Tables cleared between tests. Reference tables plus everything a test can
+# create (accounts, sessions, contributions, saved estimates). Order matters
+# only for FK'd pairs; the rest is incidental.
+_CLEANUP_MODELS = (
+    CostRecord,
+    NationalReference,
+    Hospital,
+    Scheme,
+    Treatment,
+    SavedEstimate,
+    CostContribution,
+    AuthSession,
+    PasswordResetToken,
+    User,
+)
+
+
+def make_admin(session, email: str) -> None:
+    """Flip an existing account to admin (tests sign up, then call this)."""
+    user = session.query(User).filter(User.email == email.strip().lower()).one()
+    user.is_admin = True
+    session.commit()
 
 
 @pytest.fixture(scope="session")
@@ -55,7 +83,7 @@ def db(engine):
         yield session
     finally:
         session.rollback()
-        for model in (CostRecord, NationalReference, Hospital, Scheme, Treatment):
+        for model in _CLEANUP_MODELS:
             session.query(model).delete()
         session.commit()
         session.close()
@@ -82,10 +110,12 @@ def client(engine, monkeypatch):
 
     app.dependency_overrides[get_db] = _override_get_db
     with TestClient(app) as c:
+        # Expose the shared session so tests can e.g. flip an account to admin.
+        c.db_session = session
         yield c
     app.dependency_overrides.clear()
     session.rollback()
-    for model in (CostRecord, NationalReference, Hospital, Scheme, Treatment):
+    for model in _CLEANUP_MODELS:
         session.query(model).delete()
     session.commit()
     session.close()

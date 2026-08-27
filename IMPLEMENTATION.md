@@ -49,6 +49,10 @@ hospital bill, or speak instead of type) powered by Groq.
 32. [Security posture](#32-security-posture)
 33. [Known limitations and deliberate trade-offs](#33-known-limitations-and-deliberate-trade-offs)
 34. [Extension guide](#34-extension-guide)
+35. [Crowd-sourced cost contributions](#35-crowd-sourced-cost-contributions)
+36. [Saved estimates](#36-saved-estimates)
+37. [Episode / multi-treatment estimator](#37-episode--multi-treatment-estimator)
+38. [Estimate explainer (Groq text model)](#38-estimate-explainer-groq-text-model)
 
 ---
 
@@ -102,7 +106,8 @@ healthcare-cost-predictor/
 │   ├── alembic/
 │   │   ├── env.py                   pulls DATABASE_URL + Base.metadata from app.*
 │   │   ├── script.py.mako
-│   │   └── versions/0001_initial_schema.py
+│   │   ├── versions/0001_initial_schema.py
+│   │   └── versions/0002_contributions_saved_admin.py
 │   ├── pyproject.toml               pytest + ruff + coverage config
 │   ├── requirements.txt             runtime deps
 │   ├── requirements-dev.txt         + pytest, pytest-cov, respx, ruff
@@ -120,21 +125,29 @@ healthcare-cost-predictor/
 │   │   │   ├── models.py            ORM models
 │   │   │   └── repositories.py      query helpers returning plain dicts
 │   │   ├── routers/
+│   │   │   ├── _deps.py             current_user / current_admin / optional_user
 │   │   │   ├── treatments.py        /api/treatments/search, /search-symptoms
 │   │   │   ├── predict.py           /api/predict-cost
 │   │   │   ├── hospitals.py         /api/hospitals, /api/hospitals/{id}
 │   │   │   ├── schemes.py           /api/schemes/eligible
 │   │   │   ├── auth.py              /api/auth/*
-│   │   │   └── multimodal.py        /api/multimodal/*
+│   │   │   ├── multimodal.py        /api/multimodal/*  (+ /explain-estimate)
+│   │   │   ├── contributions.py     /api/contributions/*  (submit + admin review)
+│   │   │   ├── saved.py             /api/saved-estimates/*  (auth required)
+│   │   │   └── episode.py           /api/estimate-episode
 │   │   ├── services/
 │   │   │   ├── cost_service.py      five-tier estimate + confidence + factors
 │   │   │   ├── treatment_service.py lenient + strict/F1 search
 │   │   │   ├── hospital_service.py  filter + rank
 │   │   │   ├── scheme_service.py    deterministic eligibility rules
-│   │   │   ├── auth_service.py      accounts / sessions / reset tokens
+│   │   │   ├── auth_service.py      accounts / sessions / reset tokens (+ is_admin)
+│   │   │   ├── contribution_service.py  submit / list / approve→cost_records / reject
+│   │   │   ├── saved_estimate_service.py  save (server recompute) / list+drift / delete
+│   │   │   ├── episode_service.py   per-line estimate × qty + totals + eligible schemes
 │   │   │   └── multimodal/
-│   │   │       ├── groq_client.py   httpx wrapper: chat_vision(), transcribe()
+│   │   │       ├── groq_client.py   httpx wrapper: chat_vision(), chat_text(), transcribe()
 │   │   │       ├── bill_analysis.py image → strict JSON → our match + verdict
+│   │   │       ├── explain.py       our numbers → strict JSON plain-language explanation
 │   │   │       └── transcription.py audio guard → Groq Whisper
 │   │   └── data/seed/
 │   │       ├── treatments.json          27 treatments
@@ -143,12 +156,15 @@ healthcare-cost-predictor/
 │   │       ├── hospitals.json           38 hospitals
 │   │       └── schemes.json             9 government schemes
 │   ├── scripts/generate_seed_costs.py   deterministic cost_records.json generator
-│   └── tests/                           pytest, 41 tests, SQLite fixture DB, Groq mocked
-│       ├── conftest.py                  engine / db / client fixtures + _seed_minimal
+│   └── tests/                           pytest, 63 tests, SQLite fixture DB, Groq mocked
+│       ├── conftest.py                  engine / db / client fixtures + _seed_minimal + make_admin
 │       ├── test_api.py                  10 HTTP-contract tests
 │       ├── test_auth.py                 6 auth-flow tests
 │       ├── test_cost_service.py         8 tier / confidence / language tests
-│       ├── test_multimodal.py           6 Groq-mocked tests
+│       ├── test_multimodal.py           11 Groq-mocked tests (bill + explain-estimate)
+│       ├── test_contributions.py        7 submit / admin-gate / promote tests
+│       ├── test_saved_estimates.py      5 auth / roundtrip / drift / delete tests
+│       ├── test_episode_service.py      5 multi-treatment estimate tests
 │       ├── test_scheme_service.py       5 rule tests
 │       └── test_treatment_service.py    6 search tests
 │
@@ -173,16 +189,19 @@ healthcare-cost-predictor/
     │   ├── symptom-checker/page.tsx strict symptom search + voice
     │   ├── hospitals/page.tsx       hospital list (server component)
     │   ├── hospitals/[id]/page.tsx  hospital detail + OpenStreetMap embed
-    │   ├── history/page.tsx         local (localStorage) estimate history
+    │   ├── history/page.tsx         saved (account) + localStorage recently-viewed
+    │   ├── episode/page.tsx         multi-treatment episode estimator (+ print view)
+    │   ├── contribute/review/page.tsx  admin-only contribution review
     │   ├── methodology/page.tsx     static explanation
     │   ├── login / signup / forgot-password / reset-password
-    ├── components/                  23 components (see §26)
+    ├── components/                  26 components (see §26) — incl. SaveEstimateButton, EstimateExplainer
     └── lib/
         ├── api.ts                   typed fetch wrappers + base-URL resolution
         ├── types.ts                 shared TS types, CITIES, STATES, labels
         ├── i18n.ts                  8-language dictionary + t() + parseLang()
         ├── language-context.tsx     Lang state, cookie, router.refresh()
         ├── auth-context.tsx         user state, token cookie, login/signup/logout
+        ├── token.ts                 getAuthToken() cookie reader for client islands
         ├── preferences-context.tsx  dataSaver / largeText toggles
         ├── history.ts               localStorage estimate history (max 15)
         ├── format.ts                formatINR() via Intl.NumberFormat en-IN
@@ -436,10 +455,12 @@ schema and the Postgres production schema.
 | `national_references` | `id` PK (`natref_<tid>_<type>`), `treatment_id` FK CASCADE, `hospital_type` (default `govt`), `cost_min/avg/max`, `sample_size`, `data_year`, `source` | `treatment_id` | Flattened from the nested `national_reference.json`. A `relationship()` to `Treatment` is declared **only** so the unit-of-work inserts treatments before references |
 | `hospitals` | `id` PK, `name`, `type`, `city`, `state`, `lat`, `lng` (Float), `contact`, `treatments_offered` (JSON list), `empanelled_schemes` (JSON list), `basic_rating` (Float, default 0), `source` (Text) | `type`, `city`, `state` | |
 | `schemes` | `id` PK, `name`, `region_scope` (default `national`), `eligibility_rules` (JSON dict), `coverage_details` (Text), `application_steps` (JSON list), `official_link`, `last_verified_at?` (str), `note` (Text) | PK | |
-| `users` | `id` PK (hex), `name`, `email` (unique), `password_hash` (≤128), `password_salt` (≤64), `created_at` (tz-aware) | `email` unique | |
+| `users` | `id` PK (hex), `name`, `email` (unique), `password_hash` (≤128), `password_salt` (≤64), `created_at` (tz-aware), `is_admin` (Bool, `server_default false`) | `email` unique | `is_admin` gates the contribution-review routes (§35) |
 | `auth_sessions` | `token` PK, `email`, `expires_at` (tz-aware) | `email` | Server-side sessions; 7-day TTL |
 | `password_reset_tokens` | `token` PK, `email`, `expires_at` (tz-aware) | `email` | 1-hour TTL |
 | `bill_analyses` | `id` PK, `created_at`, `user_id?`, `treatment_id?`, `city?`, `extracted` (JSON dict), `verdict` (≤16), `our_cost_avg?` (Float) | PK | **Structured summary only — the uploaded image is never stored** |
+| `cost_contributions` | `id` PK, `created_at`, `user_id?`, `treatment_id?`, `city?`, `state?`, `hospital_type?`, `hospital_name?`, `amount` (Float), `line_items` (JSON list), `source_note` (Text), `status` (≤16, `server_default 'pending'`), `reviewed_at?`, `reviewed_by?`, `promoted_cost_record_id?` | PK | User-submitted bill amounts; on approval promoted to a `cost_records` row (§35) |
+| `saved_estimates` | `id` PK, `user_id` (idx), `created_at`, `treatment_id`, `treatment_name`, `city?`, `state?`, `hospital_type?`, `label?`, `note` (Text), `cost_min/avg/max` (Float), `confidence_label` (≤16), `lang` (≤8) | `user_id` | Per-user snapshot at save time; drift computed on read (§36) |
 
 `_utcnow()` returns `datetime.now(UTC)` and is the `default` for the timestamp
 columns.
@@ -486,6 +507,12 @@ and autogenerate / `alembic check` diff against the live model metadata.
 **`versions/0001_initial_schema.py`** (`revision = "0001_initial"`, `down_revision =
 None`) creates all nine tables and every index listed in §9.3, with matching
 `downgrade()`. `sa.JSON()` columns are `nullable=False`.
+
+**`versions/0002_contributions_saved_admin.py`** (`revision = "0002_features"`,
+`down_revision = "0001_initial"`) adds `users.is_admin` (`Boolean`, `nullable=False`,
+`server_default sa.text("false")`), the `cost_contributions` table (with a
+`server_default 'pending'` on `status`), and the `saved_estimates` table + its
+`ix_saved_estimates_user_id` index — see §§35–36.
 
 **CI enforces drift-free migrations:**
 
@@ -916,12 +943,22 @@ Base path `/api`. Interactive docs at `/docs` and `/redoc`.
 | GET | `/auth/me` | header `Authorization: Bearer` | `UserOut` | 401 |
 | POST | `/auth/forgot-password` | `{email}` | `ForgotPasswordResponse` | 429 |
 | POST | `/auth/reset-password` | `{token, new_password}` | `{status:"ok"}` | 400; 429 |
-| GET | `/multimodal/status` | — | `MultimodalStatus` | — |
+| GET | `/multimodal/status` | — | `MultimodalStatus` (`vision, transcription, text, *_model`) | — |
 | POST | `/multimodal/analyze-bill` | multipart `file` + `city?`, `treatment_id?`, `lang?` | `BillAnalysisResponse` | 503 no key / model drift; 422 bad upload; 429 |
 | POST | `/multimodal/transcribe` | multipart `file` + `lang?` | `TranscriptionResponse` | 503; 422; 429 |
+| POST | `/multimodal/explain-estimate` | `{treatment_id, city?, state?, hospital_type?, lang?, line_items?}` | `EstimateExplanationOut` | 503 no key / model fail; 404 unknown treatment / no estimate; 400 no location; 429 |
+| POST | `/estimate-episode` | `{items:[{treatment_id, quantity}] (1–12), city?, state?, hospital_type?, lang?, annual_household_income?, is_govt_employee_or_pensioner?}` | `EpisodeResponse` | 400 no items / no location; 422 bad shape |
+| POST | `/contributions` | `{amount(>0), treatment_id?, city?, state?, hospital_type?, hospital_name?, line_items?, source_note?}` — optional `Authorization` | `{status:"received", id}` | 422 `amount<=0`; 400 |
+| GET | `/contributions` | `?status=pending\|approved\|rejected\|all` — **admin** | `ContributionOut[]` | 401 no session; 403 not admin |
+| POST | `/contributions/{id}/approve` | `{treatment_id?, city?, state?, hospital_type?, cost_min?, cost_max?}` — **admin** | `{contribution, cost_record_id}` | 401; 403; 404; 400 unresolved field / not pending |
+| POST | `/contributions/{id}/reject` | — **admin** | `ContributionOut` | 401; 403; 404; 400 not pending |
+| POST | `/saved-estimates` | `{treatment_id, city?, state?, hospital_type?, label?, note?, lang?}` — **auth** | `SavedEstimateOut` | 401; 400 no location; 404 no estimate |
+| GET | `/saved-estimates` | — **auth** | `SavedEstimateOut[]` (each with `drift?`) | 401 |
+| DELETE | `/saved-estimates/{id}` | — **auth** | 204 | 401; 404 (incl. not-owner) |
 
 Every error body also carries `request_id`. Validation errors (`422`) carry the
-Pydantic error list under `detail`.
+Pydantic error list under `detail`. "**admin**" = a valid bearer token for a user with
+`is_admin = true`; "**auth**" = any valid bearer token.
 
 ---
 
@@ -947,15 +984,32 @@ Pydantic error list under `detail`.
   `is_govt_employee_or_pensioner` (default `False`).
 - **`SchemeEligibilityResult`** — `scheme_id, name, eligible, reason,
   coverage_details, application_steps[], official_link, note`.
-- **Auth**: `SignupRequest`, `LoginRequest`, `UserOut{id, name, email}`,
+- **Auth**: `SignupRequest`, `LoginRequest`, `UserOut{id, name, email, is_admin}`,
   `AuthResponse{token, user}`, `ForgotPasswordRequest`, `ForgotPasswordResponse
   {message, reset_token?, note}`, `ResetPasswordRequest{token, new_password}`.
-- **Multimodal**: `MultimodalStatus{vision, transcription, vision_model?,
-  transcription_model?}`, `TranscriptionResponse{text, language?}`,
+- **Multimodal**: `MultimodalStatus{vision, transcription, text, vision_model?,
+  transcription_model?, text_model?}`, `TranscriptionResponse{text, language?}`,
   `BillLineItem{description, amount?}`, `ExtractedBillOut{hospital_name?,
   document_type, detected_treatment?, line_items[], total_amount?, currency, notes?}`,
   `BillAnalysisResponse{extracted, effective_total?, matched_treatment?,
   our_estimate?, verdict, disclaimer}`.
+- **Explainer** (§38): `ExplainEstimateRequest{treatment_id, city?, state?,
+  hospital_type?, lang?, line_items[]}`, `EstimateExplanationOut{summary,
+  line_item_notes[]{item, note}, questions_to_ask[], scheme_hint?, disclaimer}`.
+- **Contributions** (§35): `ContributionCreate{amount(gt=0), treatment_id?, …,
+  line_items[], source_note?}`, `ContributionCreateResponse{status, id}`,
+  `ContributionOut{… status, reviewed_at?, reviewed_by?, promoted_cost_record_id?}`,
+  `ContributionApprove{treatment_id?, city?, state?, hospital_type?, cost_min?,
+  cost_max?}`, `ContributionApproveResponse{contribution, cost_record_id}`.
+- **Saved estimates** (§36): `SavedEstimateCreate{treatment_id, city?, state?,
+  hospital_type?, label?, note?, lang?}`, `EstimateDrift{current_avg, delta_pct,
+  direction}`, `SavedEstimateOut{… cost_min/avg/max, confidence_label, drift?}`.
+- **Episode** (§37): `EpisodeItem{treatment_id, quantity(1–50)}`,
+  `EpisodeRequest{items[](1–12), city?, state?, hospital_type?, lang?,
+  annual_household_income?, is_govt_employee_or_pensioner}`, `EpisodeResponse{lines[]
+  {treatment, quantity, estimate, line_min/avg/max}, skipped[]{treatment_id,
+  quantity, reason}, totals{cost_min/avg/max, confidence_label}, eligible_schemes[]
+  {scheme_id, name, coverage_details}, disclaimer}`.
 
 `bill_analysis.py` also defines its **own internal** `ExtractedBill` /
 `ExtractedLineItem` models (with the amount-string coercion validators) used to
@@ -1218,7 +1272,7 @@ Devanagari fallback fonts are in every stack for Hindi/Marathi.
 
 ## 29. Testing
 
-`backend/tests/` — **41 tests**, run with `pytest -q`. Fast: an **in-memory SQLite**
+`backend/tests/` — **63 tests**, run with `pytest -q`. Fast: an **in-memory SQLite**
 database built from the same `Base.metadata`, `respx` for mocking Groq HTTP.
 
 ### 29.1 Fixtures (`conftest.py`)
@@ -1229,9 +1283,12 @@ database built from the same `Base.metadata`, `respx` for mocking Groq HTTP.
   listener issuing `PRAGMA foreign_keys=ON` so FK-ordering bugs surface like they
   would on Postgres. `Base.metadata.create_all`.
 - `db`: a fresh `Session`, seeded by `_seed_minimal`, torn down (rollback + delete
-  the 5 reference tables) after each test.
+  every table in `_CLEANUP_MODELS` — the 5 reference tables plus `users`,
+  `auth_sessions`, `password_reset_tokens`, `saved_estimates`, `cost_contributions`)
+  after each test.
 - `client`: a `TestClient` whose `get_db` dependency is overridden to yield one
-  minimally-seeded session.
+  minimally-seeded session, also exposed as `client.db_session` so a test can e.g.
+  `make_admin(client.db_session, email)`.
 - `_seed_minimal` inserts a tiny, **predictable** fixture set: 3 treatments (`t_knee`
   with Delhi govt + Delhi private_mid + Pune govt rows; `t_cataract` with a Chennai
   row + a national reference; `t_rare` with none), 2 hospitals, 3 schemes (PM-JAY,
@@ -1245,8 +1302,11 @@ database built from the same `Base.metadata`, `respx` for mocking Groq HTTP.
 | `test_treatment_service.py` (6) | `lenient_search_typo_tolerant`, `lenient_search_always_falls_back`, `empty_query_returns_all`, `strict_symptom_match_hits`, `strict_symptom_rejects_weak_guess`, `get_treatment_by_id` |
 | `test_scheme_service.py` (5) | `income_within_threshold_passes_pmjay`, `income_over_threshold_fails_pmjay`, `missing_income_cannot_confirm`, `state_inclusion_list`, `govt_employment_requirement` |
 | `test_auth.py` (6) | `signup_login_me_logout_flow`, `signup_rejects_short_password`, `duplicate_email_conflicts`, `login_wrong_password`, `forgot_and_reset_password_dev_mode`, `forgot_password_unknown_email_same_shape` (enumeration-resistance) |
-| `test_multimodal.py` (6) | `status_reports_off_without_key`, `analyze_bill_503_without_key`, `transcribe_503_without_key`, `analyze_bill_extracts_and_scores_against_our_data` (mocked model → verifies **our** verdict math), `analyze_bill_rejects_non_json_model_output` (schema-drift → 503), `analyze_bill_rejects_bad_mime` (422) |
+| `test_multimodal.py` (11) | The 6 original bill / transcription tests, plus `explain_estimate_503_without_key`, `explain_estimate_unknown_treatment` (404), `explain_estimate_requires_location` (400), `explain_estimate_returns_structured_explanation` (respx-mocked Groq **text** completion), `status_reports_text_on_with_key`. `status_reports_off_without_key` updated for the `text` / `text_model` fields |
 | `test_api.py` (10) | `health`, `health_live_and_ready`, `request_id_header_present`, `predict_cost_contract_shape`, `predict_cost_requires_location`, `predict_cost_unknown_treatment`, `hospitals_budget_mode_orders_by_cost`, `treatments_search_endpoint`, `symptom_search_empty_on_weak_match`, `auth_endpoint_is_rate_limited` |
+| `test_contributions.py` (7) | anonymous + attributed submit, `gt=0` rejection (422), admin gate (401 / 403 / 200), approve → new `cost_records` row visible to `predict-cost`, approve-without-treatment → 400, reject → status set with no row + second action → 400 |
+| `test_saved_estimates.py` (5) | `POST` 401 without token, 400 without location, save+list roundtrip with `flat` drift, unknown treatment → 404, owner-scoped delete |
+| `test_episode_service.py` (5) | per-line multiples sum to the total, unknown treatment skipped (not fatal) and excluded, 400 without location, 422 for empty `items`, eligible schemes surface when income is given |
 
 `pyproject.toml`: `testpaths=["tests"]`, warnings from `starlette.*` / `httpx.*`
 filtered, coverage `source=["app"]` omitting `app/seed.py` and `tests/*`.
@@ -1435,3 +1495,181 @@ limiting + sessions and deployment manifests.
 - Edit `app/db/models.py`, then `python -m alembic revision --autogenerate -m "…"`,
   review the generated migration, `alembic upgrade head`. CI's `alembic check`
   enforces that the migration matches the models.
+
+---
+
+## 35. Crowd-sourced cost contributions
+
+Lets a real bill amount feed the estimator, after a human review step. Nothing here
+is generated or judged by an LLM.
+
+**Schema.** Migration `0002_features` adds `cost_contributions` and a
+`users.is_admin` boolean (`server_default false`). Model in `app/db/models.py`
+(`CostContribution`): `id` (hex), `created_at`, `user_id?`, `treatment_id?`, `city?`,
+`state?`, `hospital_type?`, `hospital_name?`, `amount` (Float), `line_items` (JSON),
+`source_note` (Text), `status` (`pending|approved|rejected`, default `pending`),
+`reviewed_at?`, `reviewed_by?`, `promoted_cost_record_id?`. No FKs — same portability
+choice as `bill_analyses`.
+
+**Service** — `app/services/contribution_service.py`:
+
+| Function | Behaviour |
+|---|---|
+| `create_contribution(db, *, user_id, treatment_id, city, state, hospital_type, hospital_name, amount, line_items, source_note)` | `amount <= 0` → `ValueError`; stores a `pending` row; returns the dict |
+| `list_contributions(db, status="pending")` | newest-first; `status="all"` returns every row |
+| `approve_contribution(db, id, reviewer_id, *, treatment_id?, city?, state?, hospital_type?, cost_min?, cost_max?)` | requires a resolved treatment (must exist), city, state, and hospital type — the reviewer supplies whatever the raw upload lacked; inserts a `CostRecord` `id=f"user_{id}"`, `sample_size=1`, `cost_min/max/avg` from the supplied range or the bare `amount`, `data_year = current year`, `source = "User-contributed bill, reviewed and approved <date>. Single self-reported data point."`; marks the contribution `approved` + audit fields + `promoted_cost_record_id`. `LookupError` if missing, `ValueError` if not `pending` or a required field is unresolved |
+| `reject_contribution(db, id, reviewer_id)` | marks `rejected` + audit fields |
+
+**Auth gate** — `app/routers/_deps.py`: `current_user` (401 if no/again valid session),
+`current_admin` (403 if `not is_admin`), `optional_user` (returns `None` instead of
+raising, for anonymous-friendly routes). `auth_service._public_user()` now includes
+`is_admin`, so `/api/auth/me`, login, and signup all carry it.
+
+**Router** — `app/routers/contributions.py`, prefix `/api/contributions`:
+
+| Endpoint | Auth | Notes |
+|---|---|---|
+| `POST /` | none (`optional_user`) | default rate limit; attributes `user_id` if a bearer token is present; `amount` is `Field(gt=0)` so a non-positive value is a 422 |
+| `GET /?status=pending` | `current_admin` | list |
+| `POST /{id}/approve` | `current_admin` | body = `ContributionApprove` overrides → `{contribution, cost_record_id}` |
+| `POST /{id}/reject` | `current_admin` | → the updated contribution |
+
+**Frontend.** `components/PriceCheckTool.tsx` — after a successful bill analysis with a
+total, a green panel offers "share this bill's amount"; it calls `submitContribution`
+with the OCR total + line items + the page's `treatmentId`/`city`, attaching the token
+from `lib/token.ts` if the user is logged in. `app/contribute/review/page.tsx` — a
+client page gated on `useAuth().user?.is_admin`; lists pending contributions, each with
+editable treatment (`TreatmentAutocomplete`), city/state/type selects, optional
+min/max, and Approve / Reject. `components/Header.tsx` shows an "Admin review" link when
+`user?.is_admin`.
+
+**Making a user admin.** `make admin email=you@example.com` (or the equivalent `psql`
+`UPDATE users SET is_admin = true …`), then re-login so the session carries the flag.
+
+**Tests** — `backend/tests/test_contributions.py` (7): anonymous + attributed submit,
+`gt=0` rejection, admin gate (401 / 403 / 200), approve → the new `cost_records` row
+appears in a subsequent `POST /api/predict-cost`, approve-without-treatment → 400,
+reject → status set with no row and a second action → 400. `conftest.make_admin()` flips
+an account on the shared test session; the `client` fixture exposes it as
+`client.db_session`.
+
+---
+
+## 36. Saved estimates
+
+Per-account saved estimates with a label/note and a drift indicator, alongside the
+existing local "recently viewed" list.
+
+**Schema.** Migration `0002_features` adds `saved_estimates` (indexed `user_id`). Model
+`SavedEstimate`: `id`, `user_id`, `created_at`, `treatment_id`, `treatment_name`
+(denormalised), `city?`, `state?`, `hospital_type?`, `label?`, `note`, `cost_min/avg/max`,
+`confidence_label`, `lang`. The money columns are a **snapshot at save time**.
+
+**Service** — `app/services/saved_estimate_service.py`:
+
+| Function | Behaviour |
+|---|---|
+| `save_estimate(db, user_id, *, treatment_id, city, state, hospital_type, label, note, lang)` | **server recomputes** via `cost_service.estimate_cost` (client numbers are never trusted); `None` if the treatment is unknown or no estimate is available; otherwise stores the snapshot and returns the dict with `drift = None` |
+| `list_estimates(db, user_id)` | newest-first; for each row re-runs `estimate_cost` with the same params and attaches `drift = {current_avg, delta_pct, direction}` where `direction ∈ up\|down\|flat` (±0.5 % dead-band). Drift is best-effort — any exception → `drift = None` |
+| `delete_estimate(db, user_id, id)` | owner-scoped; `False` if the row is missing or belongs to someone else |
+
+**Router** — `app/routers/saved.py`, prefix `/api/saved-estimates`, every route
+`Depends(current_user)`:
+
+| Endpoint | Notes |
+|---|---|
+| `POST /` | 400 if no city/state; 404 if no estimate; → `SavedEstimateOut` |
+| `GET /` | → `list[SavedEstimateOut]` with `drift` |
+| `DELETE /{id}` | 204 / 404 |
+
+**Frontend.** `components/SaveEstimateButton.tsx` — a client island on the
+server-rendered `app/results/page.tsx`; reads the token via `lib/token.ts`; when logged
+out it links to `/login`, otherwise a label + note form that calls `saveEstimate`.
+`app/history/page.tsx` gains a "Saved to your account" section (drift badge + Remove
+button) above the renamed "Recently viewed on this device" `localStorage` list.
+
+**Tests** — `backend/tests/test_saved_estimates.py` (5): `POST` 401 without a token,
+400 without a location, save+list roundtrip with a `flat` drift object, unknown
+treatment → 404, delete is owner-scoped (another user → 404 and the row survives; the
+owner → 204 and it's gone).
+
+---
+
+## 37. Episode / multi-treatment estimator
+
+One combined estimate for a whole course of care. **No schema change.**
+
+**Service** — `app/services/episode_service.py` — `estimate_episode(db, items, *, city,
+state, hospital_type, lang, annual_household_income=None, is_govt_employee_or_pensioner=
+False)` where `items = [{treatment_id, quantity}]`:
+
+- Per item: `cost_service.estimate_cost(...)`, then multiply `cost_min/avg/max` by
+  `quantity` into a line `{treatment, quantity, estimate, line_min, line_avg, line_max}`.
+  Unknown treatments and items with no estimate go into `skipped[]` (with a reason) and
+  are **excluded from the totals**.
+- `totals` = summed line ranges; `confidence_label` = the **weakest** included line's
+  label (honest worst-case). Empty → `"low"`.
+- If income or the govt flag is supplied: `scheme_service.check_eligibility(...)`; the
+  `eligible` schemes are surfaced as `{scheme_id, name, coverage_details}`. **No
+  fabricated "covered amount"** — the seed schemes carry no per-procedure caps, so
+  coverage stays qualitative (§1).
+- Returns `{lines, skipped, totals, eligible_schemes, disclaimer}` (bilingual disclaimer).
+
+**Router** — `app/routers/episode.py` — `POST /api/estimate-episode`; `EpisodeRequest`
+constrains `items` to 1–12, `quantity` to 1–50; 400 if no items or no location (mirrors
+`routers/predict.py`).
+
+**Frontend** — `app/episode/page.tsx` (client): repeatable `TreatmentAutocomplete` +
+quantity rows (add/remove), city/state/type selects reusing the home-page pattern,
+optional household income + govt-employee inputs, a results table (per-line + a total
+row), a `skipped` panel, an eligible-schemes list, `DisclaimerBanner`, and a
+`window.print()` button with `print:hidden` chrome. A `FeatureCard` on `app/page.tsx`
+links `/episode`.
+
+**Tests** — `backend/tests/test_episode_service.py` (5): per-line multiples sum to the
+total, an unknown treatment is skipped (not fatal) and excluded, 400 without a location,
+422 for an empty `items` list, and eligible schemes appear when income is given.
+
+---
+
+## 38. Estimate explainer (Groq text model)
+
+Puts the previously-unused `GROQ_TEXT_MODEL` (`llama-3.3-70b-versatile`) to work as a
+**plain-language explainer of numbers our code already computed** — never a calculator.
+Same trust model as §17.2: strict prompt + Pydantic schema, no numeric post-scrub, the
+model never sees our cost tables.
+
+**Groq client** — `groq_client.chat_text(*, prompt, model=None, force_json=True)`:
+mirrors `chat_vision` (`temperature=0`, one retry on ≥500, `response_format=json_object`)
+but text-only, defaulting to `settings.groq_text_model`.
+
+**Service** — `app/services/multimodal/explain.py` — `explain_estimate(*, treatment_name,
+location_label, hospital_type, our_estimate, line_items, factors, lang)`:
+
+- `GroqUnavailable` when `not settings.groq_enabled`.
+- The prompt hands the model **only** our `cost_min/avg/max`, `confidence_label`,
+  `fallback_reason`, the `factors` text, the treatment/location/type, and any
+  caller-supplied OCR `line_items` — with explicit rules: *do not invent, adjust, or
+  recompute any rupee figure; no medical advice*.
+- Returns JSON validated against `EstimateExplanation` (`summary`, `line_item_notes[]`
+  `{item, note}`, `questions_to_ask[]`, `scheme_hint?`). Any `ValidationError` /
+  `GroqUnavailable` → a friendly `GroqUnavailable`. The response carries a `disclaimer`
+  string saying the wording is model-generated but the figures are ours.
+
+**Router** — added to `app/routers/multimodal.py`:
+
+- `POST /api/multimodal/explain-estimate` — `@limiter.limit(rate_limit_multimodal)`;
+  503 if Groq is off; 404 unknown treatment / no estimate; 400 no location. **Server
+  recomputes** `estimate_cost(...)` for the numbers it feeds the model.
+- `GET /api/multimodal/status` now also reports `text` (bool) and `text_model`.
+
+**Frontend** — `components/EstimateExplainer.tsx` on `app/results/page.tsx`: renders only
+when `multimodalStatus().text` is true; an "Explain this in plain language" button calls
+`explainEstimate({treatment_id, city, state, hospital_type, lang})` and shows the
+summary, questions, and scheme hint under a clear "wording generated by an AI model"
+label.
+
+**Tests** — added to `backend/tests/test_multimodal.py` (+5): `explain-estimate` 503
+without a key, 404 unknown treatment, 400 without a location, a respx-mocked Groq **text**
+completion returns the structured explanation, and `status` reports `text` / `text_model`.
+The existing `test_status_reports_off_without_key` was updated for the two new fields.
