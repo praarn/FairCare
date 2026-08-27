@@ -1,70 +1,38 @@
+"""User accounts, server-side sessions, and password-reset tokens.
+
+Now backed by Postgres (``users`` / ``auth_sessions`` / ``password_reset_tokens``)
+instead of JSON files. Password hashing is unchanged: stdlib PBKDF2-HMAC-SHA256,
+random 16-byte salt per user, no external crypto dependency.
+"""
 import hashlib
-import json
 import secrets
-import time
-from pathlib import Path
-from typing import Dict, List, Optional
+from datetime import UTC, datetime, timedelta
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-USERS_FILE = DATA_DIR / "users.json"
-SESSIONS_FILE = DATA_DIR / "sessions.json"
-RESET_TOKENS_FILE = DATA_DIR / "reset_tokens.json"
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-SESSION_TTL_SECONDS = 7 * 24 * 60 * 60  # 7 days
-RESET_TOKEN_TTL_SECONDS = 60 * 60  # 1 hour
-PBKDF2_ITERATIONS = 200_000
+from app.config import settings
+from app.db.models import AuthSession, PasswordResetToken, User
 
 
-# ---------- tiny JSON-file "database" helpers ----------
-# Deliberately simple (file-backed, not a real DB) to match the rest of
-# this project's approach — swap for Postgres/Supabase in a later pass.
-# encoding="utf-8" is required explicitly everywhere: see data_loader.py's
-# comment — Windows defaults to cp1252 otherwise and silently breaks on
-# any non-ASCII content.
-
-def _read_json(path: Path, default):
-    if not path.exists():
-        return default
-    with open(path, encoding="utf-8") as f:
-        content = f.read().strip()
-        return json.loads(content) if content else default
+def _utcnow() -> datetime:
+    return datetime.now(UTC)
 
 
-def _write_json(path: Path, data) -> None:
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+def _aware(dt: datetime) -> datetime:
+    """SQLite round-trips datetimes as naive; normalise before comparing."""
+    return dt if dt.tzinfo else dt.replace(tzinfo=UTC)
 
 
-def _load_users() -> List[Dict]:
-    return _read_json(USERS_FILE, [])
+# ---------- password hashing (stdlib only) ----------
 
-
-def _save_users(users: List[Dict]) -> None:
-    _write_json(USERS_FILE, users)
-
-
-def _load_sessions() -> Dict[str, Dict]:
-    return _read_json(SESSIONS_FILE, {})
-
-
-def _save_sessions(sessions: Dict[str, Dict]) -> None:
-    _write_json(SESSIONS_FILE, sessions)
-
-
-def _load_reset_tokens() -> Dict[str, Dict]:
-    return _read_json(RESET_TOKENS_FILE, {})
-
-
-def _save_reset_tokens(tokens: Dict[str, Dict]) -> None:
-    _write_json(RESET_TOKENS_FILE, tokens)
-
-
-# ---------- password hashing (stdlib only, no bcrypt dependency) ----------
-
-def hash_password(password: str, salt_hex: Optional[str] = None) -> tuple[str, str]:
+def hash_password(password: str, salt_hex: str | None = None) -> tuple[str, str]:
     salt_hex = salt_hex or secrets.token_hex(16)
     digest = hashlib.pbkdf2_hmac(
-        "sha256", password.encode("utf-8"), bytes.fromhex(salt_hex), PBKDF2_ITERATIONS
+        "sha256",
+        password.encode("utf-8"),
+        bytes.fromhex(salt_hex),
+        settings.pbkdf2_iterations,
     )
     return digest.hex(), salt_hex
 
@@ -74,98 +42,104 @@ def _verify_password(password: str, salt_hex: str, expected_hash_hex: str) -> bo
     return secrets.compare_digest(digest, expected_hash_hex)
 
 
+def _public_user(user: User) -> dict:
+    return {"id": user.id, "name": user.name, "email": user.email}
+
+
 # ---------- public API used by the router ----------
 
-def _public_user(user: Dict) -> Dict:
-    return {"id": user["id"], "name": user["name"], "email": user["email"]}
-
-
-def create_user(name: str, email: str, password: str) -> Dict:
+def create_user(db: Session, name: str, email: str, password: str) -> dict:
     email = email.strip().lower()
-    users = _load_users()
-    if any(u["email"] == email for u in users):
+    exists = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    if exists:
         raise ValueError("An account with this email already exists.")
 
     password_hash, salt = hash_password(password)
-    user = {
-        "id": secrets.token_hex(8),
-        "name": name.strip(),
-        "email": email,
-        "password_hash": password_hash,
-        "password_salt": salt,
-        "created_at": time.time(),
-    }
-    users.append(user)
-    _save_users(users)
+    user = User(
+        id=secrets.token_hex(8),
+        name=name.strip(),
+        email=email,
+        password_hash=password_hash,
+        password_salt=salt,
+        created_at=_utcnow(),
+    )
+    db.add(user)
+    db.commit()
     return _public_user(user)
 
 
-def authenticate_user(email: str, password: str) -> Optional[Dict]:
+def authenticate_user(db: Session, email: str, password: str) -> dict | None:
     email = email.strip().lower()
-    users = _load_users()
-    for user in users:
-        if user["email"] == email:
-            if _verify_password(password, user["password_salt"], user["password_hash"]):
-                return _public_user(user)
-            return None
+    user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    if not user:
+        return None
+    if _verify_password(password, user.password_salt, user.password_hash):
+        return _public_user(user)
     return None
 
 
-def create_session(email: str) -> str:
+def create_session(db: Session, email: str) -> str:
     token = secrets.token_urlsafe(32)
-    sessions = _load_sessions()
-    sessions[token] = {"email": email.strip().lower(), "expires_at": time.time() + SESSION_TTL_SECONDS}
-    _save_sessions(sessions)
+    db.add(
+        AuthSession(
+            token=token,
+            email=email.strip().lower(),
+            expires_at=_utcnow() + timedelta(seconds=settings.session_ttl_seconds),
+        )
+    )
+    db.commit()
     return token
 
 
-def get_user_by_session(token: str) -> Optional[Dict]:
-    sessions = _load_sessions()
-    session = sessions.get(token)
-    if not session or session["expires_at"] < time.time():
+def get_user_by_session(db: Session, token: str) -> dict | None:
+    session = db.get(AuthSession, token)
+    if not session or _aware(session.expires_at) < _utcnow():
         return None
-    users = _load_users()
-    for user in users:
-        if user["email"] == session["email"]:
-            return _public_user(user)
-    return None
+    user = db.execute(
+        select(User).where(User.email == session.email)
+    ).scalar_one_or_none()
+    return _public_user(user) if user else None
 
 
-def delete_session(token: str) -> None:
-    sessions = _load_sessions()
-    sessions.pop(token, None)
-    _save_sessions(sessions)
+def delete_session(db: Session, token: str) -> None:
+    session = db.get(AuthSession, token)
+    if session:
+        db.delete(session)
+        db.commit()
 
 
-def create_reset_token(email: str) -> Optional[str]:
-    """Returns None if no account exists for this email (caller decides
-    whether to reveal that, to avoid leaking which emails are registered)."""
+def create_reset_token(db: Session, email: str) -> str | None:
+    """Returns None if no account exists for this email (caller decides whether
+    to reveal that, to avoid leaking which emails are registered)."""
     email = email.strip().lower()
-    users = _load_users()
-    if not any(u["email"] == email for u in users):
+    user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    if not user:
         return None
 
     token = secrets.token_urlsafe(24)
-    tokens = _load_reset_tokens()
-    tokens[token] = {"email": email, "expires_at": time.time() + RESET_TOKEN_TTL_SECONDS}
-    _save_reset_tokens(tokens)
+    db.add(
+        PasswordResetToken(
+            token=token,
+            email=email,
+            expires_at=_utcnow() + timedelta(seconds=settings.reset_token_ttl_seconds),
+        )
+    )
+    db.commit()
     return token
 
 
-def reset_password(token: str, new_password: str) -> bool:
-    tokens = _load_reset_tokens()
-    entry = tokens.get(token)
-    if not entry or entry["expires_at"] < time.time():
+def reset_password(db: Session, token: str, new_password: str) -> bool:
+    entry = db.get(PasswordResetToken, token)
+    if not entry or _aware(entry.expires_at) < _utcnow():
         return False
 
-    users = _load_users()
-    for user in users:
-        if user["email"] == entry["email"]:
-            password_hash, salt = hash_password(new_password)
-            user["password_hash"] = password_hash
-            user["password_salt"] = salt
-            _save_users(users)
-            tokens.pop(token, None)
-            _save_reset_tokens(tokens)
-            return True
-    return False
+    user = db.execute(
+        select(User).where(User.email == entry.email)
+    ).scalar_one_or_none()
+    if not user:
+        return False
+
+    user.password_hash, user.password_salt = hash_password(new_password)
+    db.delete(entry)
+    db.commit()
+    return True

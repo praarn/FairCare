@@ -1,14 +1,14 @@
-from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
 
 class Treatment(BaseModel):
     id: str
     name: str
-    name_hi: Optional[str] = None
+    name_hi: str | None = None
     category: str
-    category_hi: Optional[str] = None
-    aliases: List[str] = []
+    category_hi: str | None = None
+    aliases: list[str] = []
     typical_duration: str
     description: str
 
@@ -29,10 +29,10 @@ class CostRecordOut(BaseModel):
 
 class PredictCostRequest(BaseModel):
     treatment_id: str
-    city: Optional[str] = None
-    state: Optional[str] = None
-    hospital_type: Optional[str] = None  # govt | private_low | private_mid | private_high
-    lang: Optional[str] = "en"  # "en" | "hi"
+    city: str | None = None
+    state: str | None = None
+    hospital_type: str | None = None  # govt | private_low | private_mid | private_high
+    lang: str | None = "en"  # "en" | "hi"
 
 
 class Estimate(BaseModel):
@@ -42,7 +42,7 @@ class Estimate(BaseModel):
     confidence_score: float = Field(..., ge=0, le=1)
     confidence_label: str  # "low" | "medium" | "high"
     is_fallback: bool
-    fallback_reason: Optional[str] = None
+    fallback_reason: str | None = None
 
 
 class Factor(BaseModel):
@@ -52,12 +52,12 @@ class Factor(BaseModel):
 
 class PredictCostResponse(BaseModel):
     treatment: Treatment
-    city: Optional[str] = None
-    state: Optional[str] = None
-    hospital_type: Optional[str]
+    city: str | None = None
+    state: str | None = None
+    hospital_type: str | None
     estimate: Estimate
-    factors: List[Factor]
-    sources: List[CostRecordOut]
+    factors: list[Factor]
+    sources: list[CostRecordOut]
     disclaimer: str
 
 
@@ -70,16 +70,16 @@ class HospitalOut(BaseModel):
     lat: float
     lng: float
     contact: str
-    empanelled_schemes: List[str]
+    empanelled_schemes: list[str]
     basic_rating: float
-    cost_avg: Optional[float] = None
-    cost_source: Optional[str] = None
+    cost_avg: float | None = None
+    cost_source: str | None = None
     source: str
 
 
 class SchemeEligibilityRequest(BaseModel):
-    annual_household_income: Optional[float] = None
-    state: Optional[str] = None
+    annual_household_income: float | None = None
+    state: str | None = None
     is_govt_employee_or_pensioner: bool = False
 
 
@@ -89,7 +89,7 @@ class SchemeEligibilityResult(BaseModel):
     eligible: bool
     reason: str
     coverage_details: str
-    application_steps: List[str]
+    application_steps: list[str]
     official_link: str
     note: str
 
@@ -124,10 +124,48 @@ class ForgotPasswordRequest(BaseModel):
 
 class ForgotPasswordResponse(BaseModel):
     message: str
-    reset_token: Optional[str] = None
+    reset_token: str | None = None
     note: str
 
 
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+
+
+# ---------- Multimodal ----------
+
+class MultimodalStatus(BaseModel):
+    vision: bool
+    transcription: bool
+    vision_model: str | None = None
+    transcription_model: str | None = None
+
+
+class TranscriptionResponse(BaseModel):
+    text: str
+    language: str | None = None
+
+
+class BillLineItem(BaseModel):
+    description: str = ""
+    amount: float | None = None
+
+
+class ExtractedBillOut(BaseModel):
+    hospital_name: str | None = None
+    document_type: str = "other"
+    detected_treatment: str | None = None
+    line_items: list[BillLineItem] = []
+    total_amount: float | None = None
+    currency: str = "INR"
+    notes: str | None = None
+
+
+class BillAnalysisResponse(BaseModel):
+    extracted: ExtractedBillOut
+    effective_total: float | None = None
+    matched_treatment: Treatment | None = None
+    our_estimate: Estimate | None = None
+    verdict: str  # "within" | "above" | "below" | "unknown"
+    disclaimer: str

@@ -1,6 +1,8 @@
 from difflib import SequenceMatcher
-from typing import List, Dict, Set
-from .data_loader import load_treatments
+
+from sqlalchemy.orm import Session
+
+from app.db import repositories
 
 # Below this score a match is considered too weak to be "the same thing" —
 # but for plain treatment-name search we still fall back to showing the
@@ -24,7 +26,7 @@ MIN_USEFUL_SCORE_STRICT = 0.35
 # distinguish one treatment from another. Stripped before word-overlap /
 # similarity scoring so a shared filler word like "operation" doesn't
 # out-rank a shared anatomical term like "knee".
-STOPWORDS: Set[str] = {
+STOPWORDS: set[str] = {
     "i", "me", "my", "have", "has", "had", "in", "is", "are", "was", "were",
     "on", "at", "near",
     "a", "an", "the", "of", "for", "to", "and", "or", "with",
@@ -37,7 +39,7 @@ STOPWORDS: Set[str] = {
 }
 
 
-def _strip_stopwords(words: Set[str]) -> Set[str]:
+def _strip_stopwords(words: set[str]) -> set[str]:
     filtered = words - STOPWORDS
     return filtered if filtered else words  # don't strip down to nothing
 
@@ -47,7 +49,7 @@ def _strip_stopwords(words: Set[str]) -> Set[str]:
 # and short voice transcripts. Kept separate from the strict/symptom
 # scorer below so tuning one never risks regressing the other.
 
-def _candidate_score_lenient(raw_query: str, query_words: Set[str], candidate: str) -> float:
+def _candidate_score_lenient(raw_query: str, query_words: set[str], candidate: str) -> float:
     candidate = candidate.strip().lower()
     if not candidate:
         return 0.0
@@ -83,7 +85,7 @@ def _candidate_score_lenient(raw_query: str, query_words: Set[str], candidate: s
 # irrelevant multi-word query now scores low on BOTH precision and recall,
 # instead of one lucky word pair being able to dominate the whole score.
 
-def _candidate_score_strict(raw_query: str, query_words: Set[str], candidate: str) -> float:
+def _candidate_score_strict(raw_query: str, query_words: set[str], candidate: str) -> float:
     candidate = candidate.strip().lower()
     if not candidate:
         return 0.0
@@ -113,7 +115,7 @@ def _candidate_score_strict(raw_query: str, query_words: Set[str], candidate: st
     return 2 * precision * recall / (precision + recall)
 
 
-def _best_score_for_treatment(raw_query: str, query_words: Set[str], treatment: Dict, use_symptoms: bool) -> float:
+def _best_score_for_treatment(raw_query: str, query_words: set[str], treatment: dict, use_symptoms: bool) -> float:
     candidates = [treatment["name"]] + treatment.get("aliases", [])
     if use_symptoms:
         candidates += treatment.get("symptoms", [])
@@ -124,7 +126,7 @@ def _best_score_for_treatment(raw_query: str, query_words: Set[str], treatment: 
     return max((scorer(raw_query, query_words, c) for c in candidates), default=0.0)
 
 
-def search_treatments(query: str, strict: bool = False) -> List[Dict]:
+def search_treatments(db: Session, query: str, strict: bool = False) -> list[dict]:
     """
     Fuzzy/closest-match search against name + aliases (+ symptoms, when
     `strict=True` is used for the symptom checker). Empty query returns
@@ -137,7 +139,7 @@ def search_treatments(query: str, strict: bool = False) -> List[Dict]:
     higher bar, and returns an empty list rather than a weak guess if
     nothing clears it.
     """
-    treatments = load_treatments()
+    treatments = repositories.all_treatments(db)
     raw_query = (query or "").strip().lower()
     if not raw_query:
         return treatments
@@ -162,8 +164,5 @@ def search_treatments(query: str, strict: bool = False) -> List[Dict]:
     return [t for score, t in scored[:5] if score > 0]
 
 
-def get_treatment_by_id(treatment_id: str) -> Dict | None:
-    for t in load_treatments():
-        if t["id"] == treatment_id:
-            return t
-    return None
+def get_treatment_by_id(db: Session, treatment_id: str) -> dict | None:
+    return repositories.treatment_by_id(db, treatment_id)

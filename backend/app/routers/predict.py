@@ -1,7 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.db.session import get_db
 from app.schemas import PredictCostRequest, PredictCostResponse
-from app.services.treatment_service import get_treatment_by_id
 from app.services.cost_service import estimate_cost
+from app.services.treatment_service import get_treatment_by_id
 
 router = APIRouter(prefix="/api/predict-cost", tags=["predict"])
 
@@ -19,8 +22,8 @@ STANDARD_DISCLAIMER_HI = (
 
 
 @router.post("", response_model=PredictCostResponse)
-def predict_cost(payload: PredictCostRequest):
-    treatment = get_treatment_by_id(payload.treatment_id)
+def predict_cost(payload: PredictCostRequest, db: Session = Depends(get_db)):
+    treatment = get_treatment_by_id(db, payload.treatment_id)
     if not treatment:
         raise HTTPException(status_code=404, detail="Unknown treatment_id")
 
@@ -30,7 +33,7 @@ def predict_cost(payload: PredictCostRequest):
     lang = payload.lang if payload.lang in ("en", "hi") else "en"
 
     result = estimate_cost(
-        payload.treatment_id, payload.city, payload.state, payload.hospital_type, lang=lang
+        db, payload.treatment_id, payload.city, payload.state, payload.hospital_type, lang=lang
     )
 
     if result["estimate"] is None:

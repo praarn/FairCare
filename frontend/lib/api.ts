@@ -1,14 +1,28 @@
-import { Treatment, PredictCostResponse, HospitalOut, SchemeResult, User } from "./types";
+import {
+  Treatment,
+  PredictCostResponse,
+  HospitalOut,
+  SchemeResult,
+  User,
+  MultimodalStatus,
+  TranscriptionResult,
+  BillAnalysisResult,
+} from "./types";
 
-// IMPORTANT: default to the explicit IPv4 loopback address, not "localhost".
 // This file's fetch() calls run both in the browser AND server-side (e.g.
-// app/layout.tsx calls fetchMe() during SSR on every request). On Windows,
-// Node resolves "localhost" to the IPv6 address (::1) first. uvicorn only
-// binds to the IPv4 loopback (127.0.0.1), so every server-side request tries
-// ::1:8000, gets nothing, and waits out a multi-second timeout before ever
-// reaching the real backend — this is what causes the wildly inconsistent
-// multi-second page load times. Using 127.0.0.1 directly skips that entirely.
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
+// app/layout.tsx calls fetchMe() during SSR on every request).
+//
+//  * Browser  -> NEXT_PUBLIC_API_BASE_URL (baked at build; the host-published
+//    backend port). Defaults to the explicit IPv4 loopback, not "localhost":
+//    on Windows, Node resolves "localhost" to IPv6 (::1) first while uvicorn
+//    binds IPv4 only, which otherwise causes multi-second SSR timeouts.
+//  * Server (SSR) -> API_INTERNAL_BASE_URL when set (runtime, server-only).
+//    Inside docker-compose this is "http://backend:8000" — "localhost" there
+//    would point at the frontend container itself, not the API.
+const API_BASE =
+  (typeof window === "undefined" ? process.env.API_INTERNAL_BASE_URL : undefined) ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "http://127.0.0.1:8000";
 
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -157,4 +171,46 @@ export async function resetPassword(token: string, new_password: string): Promis
     body: JSON.stringify({ token, new_password }),
   });
   await handle(res);
+}
+
+// ---------- Multimodal ----------
+
+export async function multimodalStatus(): Promise<MultimodalStatus> {
+  const res = await fetch(`${API_BASE}/api/multimodal/status`, { cache: "no-store" });
+  return handle<MultimodalStatus>(res);
+}
+
+export async function analyzeBill(
+  file: Blob,
+  opts: { city?: string; treatment_id?: string; lang?: string } = {}
+): Promise<BillAnalysisResult> {
+  const form = new FormData();
+  form.append("file", file, "bill.jpg");
+  if (opts.city) form.append("city", opts.city);
+  if (opts.treatment_id) form.append("treatment_id", opts.treatment_id);
+  form.append("lang", opts.lang || "en");
+
+  const res = await fetch(`${API_BASE}/api/multimodal/analyze-bill`, {
+    method: "POST",
+    body: form,
+    cache: "no-store",
+  });
+  return handle<BillAnalysisResult>(res);
+}
+
+export async function transcribeAudio(
+  blob: Blob,
+  lang: string = "en"
+): Promise<TranscriptionResult> {
+  const form = new FormData();
+  const ext = blob.type.includes("ogg") ? "ogg" : blob.type.includes("wav") ? "wav" : "webm";
+  form.append("file", blob, `clip.${ext}`);
+  form.append("lang", lang);
+
+  const res = await fetch(`${API_BASE}/api/multimodal/transcribe`, {
+    method: "POST",
+    body: form,
+    cache: "no-store",
+  });
+  return handle<TranscriptionResult>(res);
 }

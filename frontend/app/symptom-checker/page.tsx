@@ -1,10 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { searchTreatmentsBySymptom } from "@/lib/api";
 import { Treatment, CITIES } from "@/lib/types";
 import { useLanguage } from "@/lib/language-context";
+import { useServerTranscription } from "@/lib/useServerTranscription";
+
+// Minimal ambient shape for the Web Speech API - not in the default TS lib.
+interface SpeechRecognitionLike {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((event: any) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
 
 export default function SymptomCheckerPage() {
   const { t, lang } = useLanguage();
@@ -17,6 +30,56 @@ export default function SymptomCheckerPage() {
   // everyone a Delhi-priced estimate. Ask for it instead, same as the
   // home and compare pages already do.
   const [city, setCity] = useState<string>(CITIES[0]);
+
+  // Voice input: browser Web Speech API first, Groq transcription as fallback.
+  const [webSpeech, setWebSpeech] = useState(false);
+  const [webListening, setWebListening] = useState(false);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const serverTx = useServerTranscription(lang);
+
+  const micAvailable = webSpeech || serverTx.available;
+  const listening = webListening || serverTx.recording;
+
+  useEffect(() => {
+    const Ctor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    setWebSpeech(!!Ctor);
+  }, []);
+
+  function appendTranscript(text: string) {
+    setQuery((prev) => (prev ? `${prev} ${text}` : text));
+  }
+
+  function startWebSpeech() {
+    const Ctor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!Ctor) return;
+    const recognition: SpeechRecognitionLike = new Ctor();
+    recognition.lang = lang === "hi" ? "hi-IN" : "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.onresult = (event: any) => {
+      const transcript = event.results?.[0]?.[0]?.transcript ?? "";
+      if (transcript) appendTranscript(transcript);
+    };
+    recognition.onerror = () => setWebListening(false);
+    recognition.onend = () => setWebListening(false);
+    recognitionRef.current = recognition;
+    setWebListening(true);
+    recognition.start();
+  }
+
+  function handleMicClick() {
+    if (webSpeech) {
+      if (webListening) {
+        recognitionRef.current?.stop();
+        setWebListening(false);
+      } else {
+        startWebSpeech();
+      }
+      return;
+    }
+    if (serverTx.recording) serverTx.stop();
+    else void serverTx.start(appendTranscript);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,13 +113,51 @@ export default function SymptomCheckerPage() {
         onSubmit={handleSubmit}
         className="rounded-card border border-line bg-surface p-5 sm:p-6 shadow-card flex flex-col gap-4"
       >
-        <textarea
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t("symptom.placeholder")}
-          rows={3}
-          className="w-full rounded-card border border-line bg-surface px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-primary resize-none"
-        />
+        <div className="relative">
+          <textarea
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("symptom.placeholder")}
+            rows={3}
+            className="w-full rounded-card border border-line bg-surface px-4 py-3 pr-12 text-base text-ink placeholder:text-ink-soft/60 focus:border-primary resize-none"
+          />
+          {micAvailable && (
+            <button
+              type="button"
+              onClick={handleMicClick}
+              disabled={serverTx.busy}
+              aria-label={listening ? t("voice.recording") : t("search.voiceHint")}
+              title={t("search.voiceHint")}
+              className={`absolute right-2 top-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors disabled:opacity-60 ${
+                listening ? "bg-alert text-white" : "bg-primary-light text-primary hover:bg-primary/20"
+              }`}
+            >
+              {listening ? (
+                <span aria-hidden className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+              ) : (
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden>
+                  <path
+                    d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M19 11a7 7 0 0 1-14 0M12 18v3"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              )}
+            </button>
+          )}
+        </div>
+        {listening && (
+          <p className="text-xs text-alert font-medium -mt-1">{t("voice.recording")}</p>
+        )}
+        {serverTx.busy && (
+          <p className="text-xs text-ink-soft font-medium -mt-1">{t("voice.transcribing")}</p>
+        )}
         <button
           type="submit"
           disabled={loading}

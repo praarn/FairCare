@@ -158,7 +158,12 @@ export default async function ResultsPage({
 
         <InsuranceCoverageEstimator procedureCost={data.estimate.cost_avg} />
 
-        <PriceCheckTool costMin={data.estimate.cost_min} costMax={data.estimate.cost_max} />
+        <PriceCheckTool
+          costMin={data.estimate.cost_min}
+          costMax={data.estimate.cost_max}
+          treatmentId={treatment_id}
+          city={city}
+        />
 
         {city && (
           <Link

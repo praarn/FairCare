@@ -130,3 +130,43 @@ export interface SchemeResult {
   official_link: string;
   note: string;
 }
+
+// ---------- Multimodal ----------
+
+export interface MultimodalStatus {
+  vision: boolean;
+  transcription: boolean;
+  vision_model: string | null;
+  transcription_model: string | null;
+}
+
+export interface TranscriptionResult {
+  text: string;
+  language: string | null;
+}
+
+export interface BillLineItem {
+  description: string;
+  amount: number | null;
+}
+
+export interface ExtractedBill {
+  hospital_name: string | null;
+  document_type: string;
+  detected_treatment: string | null;
+  line_items: BillLineItem[];
+  total_amount: number | null;
+  currency: string;
+  notes: string | null;
+}
+
+export type BillVerdict = "within" | "above" | "below" | "unknown";
+
+export interface BillAnalysisResult {
+  extracted: ExtractedBill;
+  effective_total: number | null;
+  matched_treatment: Treatment | null;
+  our_estimate: Estimate | null;
+  verdict: BillVerdict;
+  disclaimer: string;
+}

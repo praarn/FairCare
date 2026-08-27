@@ -1,6 +1,8 @@
 from datetime import date
-from typing import List, Dict, Optional
-from .data_loader import load_cost_records, load_national_reference
+
+from sqlalchemy.orm import Session
+
+from app.db import repositories
 
 CURRENT_YEAR = date.today().year
 
@@ -30,7 +32,7 @@ def _confidence_label(score: float) -> str:
     return "low"
 
 
-def _weighted_estimate(records: List[Dict]) -> Dict:
+def _weighted_estimate(records: list[dict]) -> dict:
     """Pool multiple cost_records rows into one estimate, weighted by sample_size."""
     total_weight = sum(r["sample_size"] for r in records) or 1
     cost_min = min(r["cost_min"] for r in records)
@@ -50,19 +52,19 @@ def _weighted_estimate(records: List[Dict]) -> Dict:
     }
 
 
-def _national_reference_record(treatment_id: str, hospital_type: Optional[str]) -> Optional[Dict]:
+def _national_reference_record(
+    nat_ref: dict[str, dict], treatment_id: str, hospital_type: str | None
+) -> dict | None:
     """
     Returns a synthetic single 'record' built from a genuinely-sourced
-    national reference entry (national_reference.json), if one exists for
-    this treatment. This is NOT pooled sample data — it's a cited
-    government package rate, deliberately only present for the handful of
-    treatments where real research actually turned up a verifiable figure.
-    PM-JAY/CGHS rates are the same nationwide, which is exactly why one
-    entry here correctly covers all 36 states/UTs rather than needing (or
-    faking) per-state variation that doesn't really exist.
+    national reference entry, if one exists for this treatment. This is NOT
+    pooled sample data — it's a cited government package rate, deliberately
+    only present for the treatments where real research actually turned up a
+    verifiable figure. PM-JAY/CGHS rates are the same nationwide, which is
+    exactly why one entry here correctly covers all 36 states/UTs rather than
+    faking per-state variation that doesn't really exist.
     """
-    ref = load_national_reference()
-    entry_by_type = ref.get(treatment_id)
+    entry_by_type = nat_ref.get(treatment_id)
     if not entry_by_type:
         return None
     entry = (hospital_type and entry_by_type.get(hospital_type)) or entry_by_type.get("govt")
@@ -83,14 +85,14 @@ def _national_reference_record(treatment_id: str, hospital_type: Optional[str]) 
     }
 
 
-def _lookup_state_for_city(all_records: List[Dict], city: str) -> Optional[str]:
+def _lookup_state_for_city(all_records: list[dict], city: str) -> str | None:
     for r in all_records:
         if r["city"].lower() == city.lower():
             return r.get("state")
     return None
 
 
-def _response(est: Dict, records: List[Dict], factors: List[Dict], is_fallback: bool, reason: Optional[str]) -> Dict:
+def _response(est: dict, records: list[dict], factors: list[dict], is_fallback: bool, reason: str | None) -> dict:
     return {
         "estimate": {**est, "is_fallback": is_fallback, "fallback_reason": reason},
         "matched_records": records,
@@ -101,12 +103,13 @@ def _response(est: Dict, records: List[Dict], factors: List[Dict], is_fallback: 
 
 
 def estimate_cost(
+    db: Session,
     treatment_id: str,
-    city: Optional[str] = None,
-    state: Optional[str] = None,
-    hospital_type: Optional[str] = None,
+    city: str | None = None,
+    state: str | None = None,
+    hospital_type: str | None = None,
     lang: str = "en",
-) -> Dict:
+) -> dict:
     """
     Rule-based lookup, tried in progressively broader tiers — each one
     discloses exactly which tier produced the number, never silently:
@@ -119,9 +122,11 @@ def estimate_cost(
       5. National pooled sample average (last resort, honestly labeled
          as sample data, not a verified location-specific figure)
     """
-    all_records = load_cost_records()
+    all_records = repositories.all_cost_records(db)
+    nat_ref = repositories.national_reference_map(db)
+
     by_treatment = [r for r in all_records if r["treatment_id"] == treatment_id]
-    has_national_ref = treatment_id in load_national_reference()
+    has_national_ref = treatment_id in nat_ref
 
     if not by_treatment and not has_national_ref:
         return {
@@ -172,7 +177,7 @@ def estimate_cost(
             return _response(est, state_records, factors, True, reason)
 
     # Tier 4: national reference rate (real, cited)
-    national_record = _national_reference_record(treatment_id, hospital_type)
+    national_record = _national_reference_record(nat_ref, treatment_id, hospital_type)
     if national_record:
         est = _weighted_estimate([national_record])
         factors = _build_factors([national_record], "", fallback=True, lang=lang)
@@ -199,7 +204,7 @@ def estimate_cost(
     }
 
 
-def _reason_city_any_type(city: str, hospital_type: Optional[str], lang: str) -> str:
+def _reason_city_any_type(city: str, hospital_type: str | None, lang: str) -> str:
     if lang == "hi":
         return (
             f"{city} में '{hospital_type}' अस्पतालों का सत्यापित डेटा नहीं है — इसके बजाय "
@@ -215,7 +220,7 @@ def _reason_city_any_type(city: str, hospital_type: Optional[str], lang: str) ->
     )
 
 
-def _reason_state(state: str, hospital_type: Optional[str], lang: str) -> str:
+def _reason_state(state: str, hospital_type: str | None, lang: str) -> str:
     if lang == "hi":
         return (
             f"{state} में सटीक शहर का डेटा नहीं है — इसके बजाय {state} भर में "
@@ -253,7 +258,7 @@ def _reason_national_pool(location_label: str, lang: str) -> str:
     return f"Not enough verified data {loc_part}— showing a national average across available sample data instead."
 
 
-def _build_factors(records: List[Dict], location_label: str, fallback: bool, lang: str = "en") -> List[Dict]:
+def _build_factors(records: list[dict], location_label: str, fallback: bool, lang: str = "en") -> list[dict]:
     factors = []
     govt_records = [r for r in records if r["hospital_type"] == "govt"]
     private_records = [r for r in records if r["hospital_type"] != "govt"]

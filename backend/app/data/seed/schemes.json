@@ -1,0 +1,161 @@
+[
+  {
+    "id": "s_pmjay",
+    "name": "Ayushman Bharat PM-JAY",
+    "region_scope": "national",
+    "eligibility_rules": {
+      "max_annual_household_income": 250000,
+      "states_excluded": []
+    },
+    "coverage_details": "Cashless cover up to Rs. 5 lakh per family per year at empanelled public and private hospitals for ~1,900 listed procedures. No cap on family size or age.",
+    "application_steps": [
+      "Check eligibility at pmjay.gov.in ('Am I Eligible') or call 14555 with your ration card / mobile number",
+      "Visit the nearest empanelled hospital's Ayushman Mitra / PMAM desk with a government photo ID",
+      "Get the Ayushman card verified or generated on the spot before admission where possible"
+    ],
+    "official_link": "https://pmjay.gov.in",
+    "last_verified_at": "2026-06-01",
+    "note": "SAMPLE DATA - income threshold is a simplification for this demo. Real PM-JAY eligibility uses SECC 2011 deprivation / occupational criteria (rural) and occupational categories (urban), not a flat income cutoff. Some states also run PM-JAY in convergence with a state scheme. Verify on the official portal."
+  },
+  {
+    "id": "s_cghs",
+    "name": "Central Government Health Scheme (CGHS)",
+    "region_scope": "national",
+    "eligibility_rules": {
+      "requires_govt_employment_or_pension": true
+    },
+    "coverage_details": "Covers serving and retired central government employees, MPs, pensioners, and their dependents at CGHS wellness centres and empanelled hospitals/diagnostic labs, on a contributory basis.",
+    "application_steps": [
+      "Confirm central government employee / pensioner status and CGHS-covered city",
+      "Apply for a CGHS card through your office (serving) or pension disbursing authority (pensioner) with the prescribed contribution",
+      "Use the card at any CGHS wellness centre; for hospitalisation get a referral from the wellness centre medical officer"
+    ],
+    "official_link": "https://cghs.gov.in",
+    "last_verified_at": "2026-06-01",
+    "note": "SAMPLE DATA - eligibility simplified. State government employees are covered by separate state schemes, not CGHS. Verify current rules and covered cities on the official CGHS portal."
+  },
+  {
+    "id": "s_karnataka_arogya",
+    "name": "Ayushman Bharat - Arogya Karnataka",
+    "region_scope": "state:Karnataka",
+    "eligibility_rules": {
+      "max_annual_household_income": 500000,
+      "states_included": ["Karnataka"]
+    },
+    "coverage_details": "State scheme converged with PM-JAY. Eligible (BPL) households get cashless secondary and tertiary care; general (APL) households get partial (co-payment) cover with government referral.",
+    "application_steps": [
+      "Confirm Karnataka residency and check BPL / APL status on your ration card",
+      "Register at a government hospital or an Arogya Mitra desk with Aadhaar and ration card",
+      "Get the health card issued or verified; tertiary care needs a referral from a government hospital"
+    ],
+    "official_link": "https://arogya.karnataka.gov.in",
+    "last_verified_at": "2026-06-01",
+    "note": "SAMPLE DATA - simplified for demo. APL cover is partial and referral-based. Verify on the official Suvarna Arogya Suraksha Trust portal."
+  },
+  {
+    "id": "s_maharashtra_mjpjay",
+    "name": "Mahatma Jyotirao Phule Jan Arogya Yojana (MJPJAY)",
+    "region_scope": "state:Maharashtra",
+    "eligibility_rules": {
+      "max_annual_household_income": 100000,
+      "states_included": ["Maharashtra"]
+    },
+    "coverage_details": "Cashless cover (converged with PM-JAY, cover raised to Rs. 5 lakh per family per year) for listed surgeries and therapies at empanelled hospitals for yellow / orange / Antyodaya / white-affected-area ration card holders.",
+    "application_steps": [
+      "Confirm Maharashtra residency and eligible ration-card colour (yellow / orange / Antyodaya)",
+      "Approach an Arogya Mitra at an empanelled hospital with ration card and a government photo ID",
+      "Arogya Mitra registers the case and applies for pre-authorisation before treatment"
+    ],
+    "official_link": "https://www.jeevandayee.gov.in",
+    "last_verified_at": "2026-06-01",
+    "note": "SAMPLE DATA - income proxy stands in for ration-card category. Verify categories and the empanelled hospital list on the official MJPJAY / State Health Assurance Society portal."
+  },
+  {
+    "id": "s_tamilnadu_cmchis",
+    "name": "Chief Minister's Comprehensive Health Insurance Scheme (CMCHIS)",
+    "region_scope": "state:Tamil Nadu",
+    "eligibility_rules": {
+      "max_annual_household_income": 120000,
+      "states_included": ["Tamil Nadu"]
+    },
+    "coverage_details": "Cashless cover up to Rs. 5 lakh per family per year over a block period for listed procedures at government and empanelled private hospitals; certain high-cost procedures covered beyond the cap.",
+    "application_steps": [
+      "Confirm Tamil Nadu residency and family annual income at or below Rs. 1,20,000",
+      "Enrol at a common service centre / e-Sevai centre or government hospital with income certificate, ration card and Aadhaar",
+      "Use the issued smart card at any empanelled hospital; the hospital's insurance desk handles pre-authorisation"
+    ],
+    "official_link": "https://www.cmchistn.com",
+    "last_verified_at": "2026-06-01",
+    "note": "SAMPLE DATA - simplified. Verify the income limit, document list and empanelled hospitals on the official CMCHIS portal."
+  },
+  {
+    "id": "s_rajasthan_chiranjeevi",
+    "name": "Mukhyamantri Chiranjeevi Swasthya Bima Yojana",
+    "region_scope": "state:Rajasthan",
+    "eligibility_rules": {
+      "states_included": ["Rajasthan"]
+    },
+    "coverage_details": "Universal state health scheme for Rajasthan residents. Free for NFSA / SECC / small-and-marginal-farmer / contractual-worker families; other families join by paying an annual premium. Cover up to Rs. 25 lakh per family per year plus accident cover.",
+    "application_steps": [
+      "Confirm Rajasthan residency and check whether your family is in a free category (NFSA / SECC / farmer / contractual worker)",
+      "Register on the SSO Rajasthan portal or at an e-Mitra kiosk with Jan Aadhaar; pay the premium if not in a free category",
+      "Use the Jan Aadhaar / policy at any empanelled government or private hospital"
+    ],
+    "official_link": "https://chiranjeevi.rajasthan.gov.in",
+    "last_verified_at": "2026-06-01",
+    "note": "SAMPLE DATA - no income rule modelled because the scheme is universal with a premium for non-free categories. Verify free-category list and current premium on the official portal."
+  },
+  {
+    "id": "s_telangana_aarogyasri",
+    "name": "Dr. YSR / Rajiv Aarogyasri Health Care Trust (Telangana)",
+    "region_scope": "state:Telangana",
+    "eligibility_rules": {
+      "max_annual_household_income": 200000,
+      "states_included": ["Telangana"]
+    },
+    "coverage_details": "Cashless cover for listed secondary and tertiary procedures for white (food-security) ration card holding families of Telangana at network hospitals, with follow-up medication support for some procedures.",
+    "application_steps": [
+      "Confirm Telangana residency and a white / food-security ration card",
+      "Visit an Aarogyasri Health Coordinator (Aarogya Mithra) at a network hospital with ration card and Aadhaar",
+      "The coordinator registers the case and obtains e-preauthorisation from the Trust"
+    ],
+    "official_link": "https://www.aarogyasri.telangana.gov.in",
+    "last_verified_at": "2026-06-01",
+    "note": "SAMPLE DATA - income proxy stands in for the white ration-card criterion. Verify on the official Aarogyasri Health Care Trust portal."
+  },
+  {
+    "id": "s_westbengal_swasthyasathi",
+    "name": "Swasthya Sathi (West Bengal)",
+    "region_scope": "state:West Bengal",
+    "eligibility_rules": {
+      "states_included": ["West Bengal"]
+    },
+    "coverage_details": "Universal cashless cover up to Rs. 5 lakh per family per year for secondary and tertiary care at empanelled hospitals in and outside West Bengal. Fully state-funded; the card is issued in the name of the eldest woman of the household.",
+    "application_steps": [
+      "Confirm West Bengal residency (all families not covered by another government health scheme are eligible)",
+      "Apply through a Duare Sarkar camp or the Swasthya Sathi portal with Aadhaar and address proof",
+      "Use the Swasthya Sathi smart card at any empanelled hospital's help desk"
+    ],
+    "official_link": "https://swasthyasathi.gov.in",
+    "last_verified_at": "2026-06-01",
+    "note": "SAMPLE DATA - no income rule modelled because the scheme is universal for residents not covered elsewhere. Verify on the official Swasthya Sathi portal."
+  },
+  {
+    "id": "s_delhi_arogya_kosh",
+    "name": "Delhi Arogya Kosh (DAK)",
+    "region_scope": "state:Delhi",
+    "eligibility_rules": {
+      "max_annual_household_income": 300000,
+      "states_included": ["Delhi"]
+    },
+    "coverage_details": "Financial assistance for Delhi residents for surgeries, diagnostics, implants and cancer / trauma care at Delhi Government and empanelled private hospitals, where the treatment is not otherwise free at a government facility.",
+    "application_steps": [
+      "Confirm at least three years' Delhi residency and family income within the notified limit",
+      "Get a referral and estimate from the treating Delhi Government hospital",
+      "Apply to the Arogya Kosh cell with the estimate, income certificate, residence proof and Aadhaar"
+    ],
+    "official_link": "https://health.delhi.gov.in",
+    "last_verified_at": "2026-06-01",
+    "note": "SAMPLE DATA - income limit and residency period are approximate. Verify current terms with the Delhi Government Health & Family Welfare Department."
+  }
+]

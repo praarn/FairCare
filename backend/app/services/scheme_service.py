@@ -1,19 +1,22 @@
-from typing import List, Dict, Optional
-from .data_loader import load_schemes
+
+from sqlalchemy.orm import Session
+
+from app.db import repositories
 
 
 def check_eligibility(
-    annual_household_income: Optional[float],
-    state: Optional[str],
+    db: Session,
+    annual_household_income: float | None,
+    state: str | None,
     is_govt_employee_or_pensioner: bool,
-) -> List[Dict]:
+) -> list[dict]:
     """
     Plain deterministic rules — intentionally not an LLM call. Insurance/scheme
     eligibility is factually and legally sensitive, so this stays auditable
     and unit-testable rule-by-rule.
     """
     results = []
-    for scheme in load_schemes():
+    for scheme in repositories.all_schemes(db):
         rules = scheme["eligibility_rules"]
         eligible = True
         reasons = []

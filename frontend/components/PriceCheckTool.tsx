@@ -1,25 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatINR } from "@/lib/format";
 import { useLanguage } from "@/lib/language-context";
+import { analyzeBill, multimodalStatus } from "@/lib/api";
+import type { BillLineItem } from "@/lib/types";
 
 export default function PriceCheckTool({
   costMin,
   costMax,
+  treatmentId,
+  city,
 }: {
   costMin: number;
   costMax: number;
+  treatmentId?: string;
+  city?: string;
 }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [quote, setQuote] = useState("");
   const [checked, setChecked] = useState<number | null>(null);
+
+  // ----- bill photo (multimodal, optional) -----
+  const [visionOn, setVisionOn] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [billItems, setBillItems] = useState<BillLineItem[] | null>(null);
+  const [billError, setBillError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    multimodalStatus()
+      .then((s) => !cancelled && setVisionOn(s.vision))
+      .catch(() => !cancelled && setVisionOn(false));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function handleCheck(e: React.FormEvent) {
     e.preventDefault();
     const value = Number(quote);
     if (!quote || Number.isNaN(value)) return;
     setChecked(value);
+  }
+
+  async function handleBillFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file
+    if (!file) return;
+    setAnalyzing(true);
+    setBillError(null);
+    setBillItems(null);
+    try {
+      const res = await analyzeBill(file, { city, treatment_id: treatmentId, lang });
+      const total = res.effective_total ?? res.extracted.total_amount;
+      setBillItems(res.extracted.line_items ?? []);
+      if (total != null) {
+        setQuote(String(total));
+        setChecked(total);
+      }
+    } catch {
+      setBillError(t("priceCheck.uploadFailed"));
+    } finally {
+      setAnalyzing(false);
+    }
   }
 
   let verdict: "within" | "below" | "above" | null = null;
@@ -61,6 +106,47 @@ export default function PriceCheckTool({
           {t("priceCheck.check")}
         </button>
       </form>
+
+      {visionOn && (
+        <div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            capture="environment"
+            onChange={handleBillFile}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={analyzing}
+            className="w-full rounded-card border border-line hover:border-primary/50 text-sm font-medium text-ink-soft hover:text-primary py-2.5 transition-colors disabled:opacity-60"
+          >
+            {analyzing ? t("priceCheck.analyzing") : `📷 ${t("priceCheck.uploadBill")}`}
+          </button>
+          {billError && <p className="text-xs text-alert font-medium mt-1.5">{billError}</p>}
+        </div>
+      )}
+
+      {billItems && billItems.length > 0 && (
+        <div className="rounded-card border border-line px-4 py-3">
+          <p className="text-[11px] uppercase tracking-wide text-ink-soft font-semibold mb-2">
+            {t("priceCheck.extractedItems")}
+          </p>
+          <ul className="flex flex-col gap-1">
+            {billItems.map((it, i) => (
+              <li key={i} className="flex justify-between gap-3 text-xs text-ink-soft">
+                <span className="truncate">{it.description || "—"}</span>
+                <span className="font-mono shrink-0 text-ink">
+                  {it.amount != null ? formatINR(it.amount) : "—"}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-[11px] text-ink-soft mt-2 leading-relaxed">{t("priceCheck.llmNote")}</p>
+        </div>
+      )}
 
       {verdict && (
         <div className={`rounded-card border px-4 py-3 text-sm ${VERDICT_STYLE[verdict]}`}>

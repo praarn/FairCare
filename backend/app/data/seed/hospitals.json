@@ -1,0 +1,274 @@
+[
+  {
+    "id": "h_del_01", "name": "All India Institute of Medical Sciences (AIIMS), Delhi", "type": "govt",
+    "city": "Delhi", "state": "Delhi", "lat": 28.5672, "lng": 77.2100, "contact": "011-26588500",
+    "treatments_offered": ["t_appendectomy", "t_c_section", "t_normal_delivery", "t_knee_replacement", "t_hip_replacement", "t_angioplasty", "t_bypass_surgery", "t_dialysis", "t_chemotherapy_session", "t_discectomy", "t_diagnostic_angiography", "t_thyroid_surgery"],
+    "empanelled_schemes": ["PM-JAY", "CGHS"], "basic_rating": 4.3,
+    "source": "SAMPLE DATA - real public hospital; treatment list and rating are illustrative, not an official service directory."
+  },
+  {
+    "id": "h_del_02", "name": "Safdarjung Hospital", "type": "govt",
+    "city": "Delhi", "state": "Delhi", "lat": 28.5690, "lng": 77.2065, "contact": "011-26165060",
+    "treatments_offered": ["t_appendectomy", "t_normal_delivery", "t_c_section", "t_cataract", "t_dialysis", "t_fracture_fixation", "t_hernia_repair", "t_typhoid_treatment", "t_dengue_treatment", "t_gastroenteritis"],
+    "empanelled_schemes": ["PM-JAY", "CGHS"], "basic_rating": 3.8,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_del_03", "name": "Lok Nayak Hospital (LNJP)", "type": "govt",
+    "city": "Delhi", "state": "Delhi", "lat": 28.6410, "lng": 77.2340, "contact": "011-23239271",
+    "treatments_offered": ["t_appendectomy", "t_normal_delivery", "t_c_section", "t_gallbladder_removal", "t_piles_surgery", "t_kidney_stone_removal", "t_turp_prostate", "t_typhoid_treatment", "t_dengue_treatment"],
+    "empanelled_schemes": ["PM-JAY", "Delhi Arogya Kosh"], "basic_rating": 3.7,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_del_04", "name": "Sunrise Care Hospital, Rohini", "type": "private_low",
+    "city": "Delhi", "state": "Delhi", "lat": 28.7160, "lng": 77.1170, "contact": "011-40056789",
+    "treatments_offered": ["t_normal_delivery", "t_c_section", "t_dialysis", "t_cataract", "t_hernia_repair", "t_gastroenteritis", "t_copd_exacerbation"],
+    "empanelled_schemes": ["PM-JAY"], "basic_rating": 4.0,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_del_05", "name": "Apex Multispeciality Hospital, Dwarka", "type": "private_mid",
+    "city": "Delhi", "state": "Delhi", "lat": 28.5921, "lng": 77.0460, "contact": "011-40011234",
+    "treatments_offered": ["t_appendectomy", "t_gallbladder_removal", "t_hernia_repair", "t_knee_replacement", "t_fracture_fixation", "t_discectomy", "t_kidney_stone_removal", "t_turp_prostate", "t_thyroid_surgery", "t_diagnostic_angiography"],
+    "empanelled_schemes": [], "basic_rating": 4.1,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_del_06", "name": "Horizon Heart & Superspeciality Institute, Saket", "type": "private_high",
+    "city": "Delhi", "state": "Delhi", "lat": 28.5245, "lng": 77.2066, "contact": "011-40098765",
+    "treatments_offered": ["t_angioplasty", "t_bypass_surgery", "t_diagnostic_angiography", "t_knee_replacement", "t_hip_replacement", "t_discectomy", "t_chemotherapy_session", "t_lasik"],
+    "empanelled_schemes": [], "basic_rating": 4.6,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+
+  {
+    "id": "h_mum_01", "name": "King Edward Memorial (KEM) Hospital, Parel", "type": "govt",
+    "city": "Mumbai", "state": "Maharashtra", "lat": 19.0009, "lng": 72.8419, "contact": "022-24107000",
+    "treatments_offered": ["t_appendectomy", "t_c_section", "t_normal_delivery", "t_knee_replacement", "t_hip_replacement", "t_fracture_fixation", "t_dialysis", "t_chemotherapy_session", "t_discectomy", "t_angioplasty", "t_diagnostic_angiography"],
+    "empanelled_schemes": ["PM-JAY", "MJPJAY", "CGHS"], "basic_rating": 4.1,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_mum_02", "name": "Sion Hospital (LTMGH)", "type": "govt",
+    "city": "Mumbai", "state": "Maharashtra", "lat": 19.0430, "lng": 72.8617, "contact": "022-24076381",
+    "treatments_offered": ["t_appendectomy", "t_normal_delivery", "t_c_section", "t_hernia_repair", "t_gallbladder_removal", "t_typhoid_treatment", "t_dengue_treatment", "t_gastroenteritis", "t_cataract"],
+    "empanelled_schemes": ["PM-JAY", "MJPJAY"], "basic_rating": 3.7,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_mum_03", "name": "Tata Memorial Hospital, Parel", "type": "govt",
+    "city": "Mumbai", "state": "Maharashtra", "lat": 19.0050, "lng": 72.8430, "contact": "022-24177000",
+    "treatments_offered": ["t_chemotherapy_session", "t_thyroid_surgery", "t_hysterectomy"],
+    "empanelled_schemes": ["PM-JAY", "MJPJAY", "CGHS"], "basic_rating": 4.5,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_mum_04", "name": "Matoshree Nursing Home, Ghatkopar", "type": "private_low",
+    "city": "Mumbai", "state": "Maharashtra", "lat": 19.0860, "lng": 72.9080, "contact": "022-40561122",
+    "treatments_offered": ["t_normal_delivery", "t_c_section", "t_cataract", "t_dialysis", "t_piles_surgery", "t_gastroenteritis"],
+    "empanelled_schemes": ["PM-JAY", "MJPJAY"], "basic_rating": 3.9,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_mum_05", "name": "Seven Hills Multispeciality Hospital, Andheri", "type": "private_mid",
+    "city": "Mumbai", "state": "Maharashtra", "lat": 19.1130, "lng": 72.8730, "contact": "022-40569000",
+    "treatments_offered": ["t_appendectomy", "t_gallbladder_removal", "t_hernia_repair", "t_knee_replacement", "t_fracture_fixation", "t_kidney_stone_removal", "t_turp_prostate", "t_hysterectomy", "t_diagnostic_angiography", "t_discectomy"],
+    "empanelled_schemes": ["MJPJAY"], "basic_rating": 4.2,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_mum_06", "name": "Meridian Cardiac & Ortho Institute, Bandra", "type": "private_high",
+    "city": "Mumbai", "state": "Maharashtra", "lat": 19.0596, "lng": 72.8295, "contact": "022-40590000",
+    "treatments_offered": ["t_angioplasty", "t_bypass_surgery", "t_diagnostic_angiography", "t_knee_replacement", "t_hip_replacement", "t_discectomy", "t_lasik"],
+    "empanelled_schemes": [], "basic_rating": 4.6,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+
+  {
+    "id": "h_blr_01", "name": "Victoria Hospital (BMCRI)", "type": "govt",
+    "city": "Bengaluru", "state": "Karnataka", "lat": 12.9634, "lng": 77.5855, "contact": "080-26700810",
+    "treatments_offered": ["t_appendectomy", "t_c_section", "t_normal_delivery", "t_cataract", "t_hernia_repair", "t_gallbladder_removal", "t_fracture_fixation", "t_kidney_stone_removal", "t_turp_prostate", "t_typhoid_treatment", "t_dengue_treatment"],
+    "empanelled_schemes": ["PM-JAY", "Arogya Karnataka"], "basic_rating": 3.8,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_blr_02", "name": "Jayadeva Institute of Cardiovascular Sciences", "type": "govt",
+    "city": "Bengaluru", "state": "Karnataka", "lat": 12.9180, "lng": 77.5990, "contact": "080-22977227",
+    "treatments_offered": ["t_angioplasty", "t_bypass_surgery", "t_diagnostic_angiography"],
+    "empanelled_schemes": ["PM-JAY", "Arogya Karnataka", "CGHS"], "basic_rating": 4.4,
+    "source": "SAMPLE DATA - real public institute; details illustrative."
+  },
+  {
+    "id": "h_blr_03", "name": "Bowring & Lady Curzon Hospital", "type": "govt",
+    "city": "Bengaluru", "state": "Karnataka", "lat": 12.9830, "lng": 77.6060, "contact": "080-25591362",
+    "treatments_offered": ["t_normal_delivery", "t_c_section", "t_dialysis", "t_typhoid_treatment", "t_dengue_treatment", "t_gastroenteritis", "t_copd_exacerbation"],
+    "empanelled_schemes": ["PM-JAY", "Arogya Karnataka"], "basic_rating": 3.6,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_blr_04", "name": "Greenview Eye & General Hospital, Jayanagar", "type": "private_low",
+    "city": "Bengaluru", "state": "Karnataka", "lat": 12.9250, "lng": 77.5938, "contact": "080-40012345",
+    "treatments_offered": ["t_cataract", "t_lasik", "t_dialysis", "t_normal_delivery", "t_piles_surgery", "t_gastroenteritis"],
+    "empanelled_schemes": ["PM-JAY"], "basic_rating": 4.1,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_blr_05", "name": "Metro Care Multispeciality, Koramangala", "type": "private_mid",
+    "city": "Bengaluru", "state": "Karnataka", "lat": 12.9352, "lng": 77.6245, "contact": "080-40067890",
+    "treatments_offered": ["t_appendectomy", "t_gallbladder_removal", "t_hernia_repair", "t_knee_replacement", "t_hip_replacement", "t_discectomy", "t_hysterectomy", "t_thyroid_surgery", "t_kidney_stone_removal", "t_diagnostic_angiography"],
+    "empanelled_schemes": ["Arogya Karnataka"], "basic_rating": 4.2,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_blr_06", "name": "Whitefield Advanced Surgical Centre", "type": "private_high",
+    "city": "Bengaluru", "state": "Karnataka", "lat": 12.9698, "lng": 77.7500, "contact": "080-40090000",
+    "treatments_offered": ["t_angioplasty", "t_bypass_surgery", "t_knee_replacement", "t_hip_replacement", "t_discectomy", "t_chemotherapy_session", "t_lasik"],
+    "empanelled_schemes": [], "basic_rating": 4.5,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+
+  {
+    "id": "h_pun_01", "name": "Sassoon General Hospital (BJGMC)", "type": "govt",
+    "city": "Pune", "state": "Maharashtra", "lat": 18.5289, "lng": 73.8720, "contact": "020-26128000",
+    "treatments_offered": ["t_appendectomy", "t_c_section", "t_normal_delivery", "t_cataract", "t_dialysis", "t_fracture_fixation", "t_hernia_repair", "t_typhoid_treatment", "t_dengue_treatment", "t_hip_replacement", "t_chemotherapy_session"],
+    "empanelled_schemes": ["PM-JAY", "MJPJAY"], "basic_rating": 3.7,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_pun_02", "name": "Pune Municipal Corporation Kamla Nehru Hospital", "type": "govt",
+    "city": "Pune", "state": "Maharashtra", "lat": 18.5115, "lng": 73.8500, "contact": "020-24441504",
+    "treatments_offered": ["t_normal_delivery", "t_c_section", "t_dialysis", "t_typhoid_treatment", "t_dengue_treatment", "t_gastroenteritis"],
+    "empanelled_schemes": ["PM-JAY", "MJPJAY"], "basic_rating": 3.5,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_pun_03", "name": "Deccan Care Hospital, Kothrud", "type": "private_low",
+    "city": "Pune", "state": "Maharashtra", "lat": 18.5074, "lng": 73.8077, "contact": "020-40563311",
+    "treatments_offered": ["t_normal_delivery", "t_c_section", "t_cataract", "t_lasik", "t_dialysis", "t_piles_surgery", "t_gastroenteritis"],
+    "empanelled_schemes": ["MJPJAY"], "basic_rating": 4.0,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_pun_04", "name": "Symbiosis Multispeciality Hospital, Hinjawadi", "type": "private_mid",
+    "city": "Pune", "state": "Maharashtra", "lat": 18.5915, "lng": 73.7380, "contact": "020-40569999",
+    "treatments_offered": ["t_appendectomy", "t_gallbladder_removal", "t_hernia_repair", "t_knee_replacement", "t_hip_replacement", "t_kidney_stone_removal", "t_chemotherapy_session", "t_diagnostic_angiography"],
+    "empanelled_schemes": [], "basic_rating": 4.3,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_pun_05", "name": "Blue Ridge Heart Institute, Baner", "type": "private_high",
+    "city": "Pune", "state": "Maharashtra", "lat": 18.5590, "lng": 73.7770, "contact": "020-40590909",
+    "treatments_offered": ["t_angioplasty", "t_bypass_surgery", "t_diagnostic_angiography", "t_knee_replacement", "t_hip_replacement"],
+    "empanelled_schemes": [], "basic_rating": 4.5,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+
+  {
+    "id": "h_che_01", "name": "Rajiv Gandhi Government General Hospital (RGGGH)", "type": "govt",
+    "city": "Chennai", "state": "Tamil Nadu", "lat": 13.0827, "lng": 80.2757, "contact": "044-25305000",
+    "treatments_offered": ["t_appendectomy", "t_c_section", "t_normal_delivery", "t_cataract", "t_dialysis", "t_fracture_fixation", "t_hernia_repair", "t_gallbladder_removal", "t_kidney_stone_removal", "t_turp_prostate", "t_angioplasty", "t_diagnostic_angiography", "t_typhoid_treatment", "t_dengue_treatment"],
+    "empanelled_schemes": ["PM-JAY", "CMCHIS", "CGHS"], "basic_rating": 3.9,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_che_02", "name": "Government Kilpauk Medical College Hospital", "type": "govt",
+    "city": "Chennai", "state": "Tamil Nadu", "lat": 13.0780, "lng": 80.2400, "contact": "044-26412148",
+    "treatments_offered": ["t_normal_delivery", "t_c_section", "t_hysterectomy", "t_thyroid_surgery", "t_piles_surgery", "t_typhoid_treatment", "t_dengue_treatment", "t_gastroenteritis", "t_copd_exacerbation"],
+    "empanelled_schemes": ["PM-JAY", "CMCHIS"], "basic_rating": 3.6,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_che_03", "name": "Anna Nagar Community Hospital", "type": "private_low",
+    "city": "Chennai", "state": "Tamil Nadu", "lat": 13.0850, "lng": 80.2101, "contact": "044-40563322",
+    "treatments_offered": ["t_normal_delivery", "t_c_section", "t_cataract", "t_lasik", "t_dialysis", "t_gastroenteritis", "t_piles_surgery"],
+    "empanelled_schemes": ["CMCHIS"], "basic_rating": 4.0,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_che_04", "name": "Marina Multispeciality Hospital, T Nagar", "type": "private_mid",
+    "city": "Chennai", "state": "Tamil Nadu", "lat": 13.0410, "lng": 80.2340, "contact": "044-40569090",
+    "treatments_offered": ["t_appendectomy", "t_gallbladder_removal", "t_hernia_repair", "t_knee_replacement", "t_hip_replacement", "t_discectomy", "t_kidney_stone_removal", "t_turp_prostate", "t_diagnostic_angiography"],
+    "empanelled_schemes": ["CMCHIS"], "basic_rating": 4.2,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_che_05", "name": "Coromandel Advanced Heart Centre, OMR", "type": "private_high",
+    "city": "Chennai", "state": "Tamil Nadu", "lat": 12.9440, "lng": 80.2300, "contact": "044-40590000",
+    "treatments_offered": ["t_angioplasty", "t_bypass_surgery", "t_diagnostic_angiography", "t_knee_replacement", "t_discectomy", "t_chemotherapy_session", "t_lasik"],
+    "empanelled_schemes": [], "basic_rating": 4.5,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+
+  {
+    "id": "h_hyd_01", "name": "Osmania General Hospital", "type": "govt",
+    "city": "Hyderabad", "state": "Telangana", "lat": 17.3730, "lng": 78.4757, "contact": "040-24600121",
+    "treatments_offered": ["t_appendectomy", "t_c_section", "t_normal_delivery", "t_cataract", "t_dialysis", "t_fracture_fixation", "t_hernia_repair", "t_gallbladder_removal", "t_typhoid_treatment", "t_dengue_treatment", "t_gastroenteritis"],
+    "empanelled_schemes": ["PM-JAY", "Aarogyasri"], "basic_rating": 3.6,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_hyd_02", "name": "Nizam's Institute of Medical Sciences (NIMS)", "type": "govt",
+    "city": "Hyderabad", "state": "Telangana", "lat": 17.4239, "lng": 78.4520, "contact": "040-23489000",
+    "treatments_offered": ["t_angioplasty", "t_bypass_surgery", "t_diagnostic_angiography", "t_knee_replacement", "t_hip_replacement", "t_discectomy", "t_chemotherapy_session", "t_thyroid_surgery", "t_turp_prostate"],
+    "empanelled_schemes": ["PM-JAY", "Aarogyasri", "CGHS"], "basic_rating": 4.3,
+    "source": "SAMPLE DATA - real public institute; details illustrative."
+  },
+  {
+    "id": "h_hyd_03", "name": "Gandhi Hospital, Secunderabad", "type": "govt",
+    "city": "Hyderabad", "state": "Telangana", "lat": 17.4462, "lng": 78.5008, "contact": "040-27505566",
+    "treatments_offered": ["t_normal_delivery", "t_c_section", "t_hysterectomy", "t_piles_surgery", "t_kidney_stone_removal", "t_typhoid_treatment", "t_dengue_treatment", "t_copd_exacerbation"],
+    "empanelled_schemes": ["PM-JAY", "Aarogyasri"], "basic_rating": 3.7,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_hyd_04", "name": "Charminar Care Hospital", "type": "private_low",
+    "city": "Hyderabad", "state": "Telangana", "lat": 17.3616, "lng": 78.4747, "contact": "040-40561212",
+    "treatments_offered": ["t_normal_delivery", "t_c_section", "t_cataract", "t_lasik", "t_dialysis", "t_gastroenteritis", "t_chemotherapy_session"],
+    "empanelled_schemes": ["Aarogyasri"], "basic_rating": 3.9,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_hyd_05", "name": "Hitec City Multispeciality Hospital", "type": "private_mid",
+    "city": "Hyderabad", "state": "Telangana", "lat": 17.4470, "lng": 78.3780, "contact": "040-40569898",
+    "treatments_offered": ["t_appendectomy", "t_gallbladder_removal", "t_hernia_repair", "t_knee_replacement", "t_hip_replacement", "t_discectomy", "t_diagnostic_angiography", "t_turp_prostate", "t_thyroid_surgery"],
+    "empanelled_schemes": [], "basic_rating": 4.2,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+
+  {
+    "id": "h_kol_01", "name": "SSKM Hospital (IPGME&R)", "type": "govt",
+    "city": "Kolkata", "state": "West Bengal", "lat": 22.5390, "lng": 88.3430, "contact": "033-22041101",
+    "treatments_offered": ["t_appendectomy", "t_c_section", "t_normal_delivery", "t_cataract", "t_dialysis", "t_fracture_fixation", "t_hernia_repair", "t_gallbladder_removal", "t_angioplasty", "t_diagnostic_angiography", "t_chemotherapy_session", "t_discectomy", "t_typhoid_treatment", "t_dengue_treatment"],
+    "empanelled_schemes": ["PM-JAY", "Swasthya Sathi", "CGHS"], "basic_rating": 3.9,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_kol_02", "name": "Medical College & Hospital, Kolkata", "type": "govt",
+    "city": "Kolkata", "state": "West Bengal", "lat": 22.5745, "lng": 88.3630, "contact": "033-22551000",
+    "treatments_offered": ["t_normal_delivery", "t_c_section", "t_hysterectomy", "t_thyroid_surgery", "t_piles_surgery", "t_kidney_stone_removal", "t_turp_prostate", "t_gastroenteritis", "t_copd_exacerbation"],
+    "empanelled_schemes": ["PM-JAY", "Swasthya Sathi"], "basic_rating": 3.6,
+    "source": "SAMPLE DATA - real public hospital; details illustrative."
+  },
+  {
+    "id": "h_kol_03", "name": "Salt Lake Community Hospital", "type": "private_low",
+    "city": "Kolkata", "state": "West Bengal", "lat": 22.5800, "lng": 88.4200, "contact": "033-40561414",
+    "treatments_offered": ["t_normal_delivery", "t_c_section", "t_cataract", "t_dialysis", "t_gastroenteritis", "t_piles_surgery", "t_copd_exacerbation"],
+    "empanelled_schemes": ["Swasthya Sathi"], "basic_rating": 3.9,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_kol_04", "name": "Park Circus Multispeciality Hospital", "type": "private_mid",
+    "city": "Kolkata", "state": "West Bengal", "lat": 22.5390, "lng": 88.3670, "contact": "033-40569393",
+    "treatments_offered": ["t_appendectomy", "t_gallbladder_removal", "t_hernia_repair", "t_knee_replacement", "t_hip_replacement", "t_discectomy", "t_kidney_stone_removal", "t_diagnostic_angiography"],
+    "empanelled_schemes": ["Swasthya Sathi"], "basic_rating": 4.1,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  },
+  {
+    "id": "h_kol_05", "name": "Eastern Cardiac & Ortho Institute, New Town", "type": "private_high",
+    "city": "Kolkata", "state": "West Bengal", "lat": 22.5800, "lng": 88.4600, "contact": "033-40590000",
+    "treatments_offered": ["t_angioplasty", "t_bypass_surgery", "t_diagnostic_angiography", "t_knee_replacement", "t_hip_replacement", "t_discectomy", "t_lasik"],
+    "empanelled_schemes": [], "basic_rating": 4.4,
+    "source": "SAMPLE DATA - fictional placeholder facility for demo."
+  }
+]

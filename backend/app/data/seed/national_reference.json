@@ -1,0 +1,74 @@
+{
+  "_read_me": "Approximate PM-JAY / CGHS national package rates, for the subset of treatments where a public secondary source gives a figure. PM-JAY/CGHS rates are the same across all states/UTs, so one 'govt' entry per treatment correctly serves every state. These are rounded approximations gathered from secondary aggregators referencing the NHA Health Benefit Package schedule and CGHS rate lists, NOT the primary nha.gov.in / cghs.gov.in PDFs — verify the exact current figure before relying on it. The seed loader flattens this file into national_references rows.",
+
+  "t_knee_replacement": {
+    "govt": {
+      "cost_min": 80000, "cost_avg": 100000, "cost_max": 120000,
+      "sample_size": 40, "data_year": 2025,
+      "source": "Approx. PM-JAY package rate (national). Secondary sources referencing the NHA HBP schedule. Verify at nha.gov.in."
+    }
+  },
+  "t_cataract": {
+    "govt": {
+      "cost_min": 5500, "cost_avg": 6500, "cost_max": 7500,
+      "sample_size": 40, "data_year": 2025,
+      "source": "Approx. PM-JAY day-care package rate (national). Secondary source referencing the NHA HBP schedule. Verify at nha.gov.in."
+    }
+  },
+  "t_angioplasty": {
+    "govt": {
+      "cost_min": 55000, "cost_avg": 75000, "cost_max": 95000,
+      "sample_size": 35, "data_year": 2025,
+      "source": "Approx. PM-JAY single-stent angioplasty package rate (national), stent cost capped separately by NPPA. Secondary sources; verify at nha.gov.in / nppa.gov.in."
+    }
+  },
+  "t_bypass_surgery": {
+    "govt": {
+      "cost_min": 110000, "cost_avg": 140000, "cost_max": 170000,
+      "sample_size": 25, "data_year": 2025,
+      "source": "Approx. PM-JAY CABG package rate (national). Secondary sources referencing the NHA HBP schedule. Verify at nha.gov.in."
+    }
+  },
+  "t_c_section": {
+    "govt": {
+      "cost_min": 9000, "cost_avg": 12000, "cost_max": 15000,
+      "sample_size": 45, "data_year": 2025,
+      "source": "Approx. PM-JAY caesarean-delivery package rate (national). Secondary sources; verify at nha.gov.in."
+    }
+  },
+  "t_normal_delivery": {
+    "govt": {
+      "cost_min": 5000, "cost_avg": 7000, "cost_max": 9000,
+      "sample_size": 50, "data_year": 2025,
+      "source": "Approx. PM-JAY normal-delivery package rate (national); often free under JSY at government facilities. Secondary sources; verify at nha.gov.in."
+    }
+  },
+  "t_hernia_repair": {
+    "govt": {
+      "cost_min": 12000, "cost_avg": 16000, "cost_max": 20000,
+      "sample_size": 40, "data_year": 2025,
+      "source": "Approx. PM-JAY inguinal-hernia mesh-repair package rate (national). Secondary sources; verify at nha.gov.in."
+    }
+  },
+  "t_hysterectomy": {
+    "govt": {
+      "cost_min": 20000, "cost_avg": 27000, "cost_max": 34000,
+      "sample_size": 35, "data_year": 2025,
+      "source": "Approx. PM-JAY hysterectomy package rate (national). Secondary sources; verify at nha.gov.in."
+    }
+  },
+  "t_dialysis": {
+    "govt": {
+      "cost_min": 1400, "cost_avg": 1650, "cost_max": 2000,
+      "sample_size": 60, "data_year": 2025,
+      "source": "Approx. per-session haemodialysis rate under PMNDP / PM-JAY (national); free for eligible patients at government dialysis centres. Secondary sources; verify at nha.gov.in."
+    }
+  },
+  "t_appendectomy": {
+    "govt": {
+      "cost_min": 10000, "cost_avg": 14000, "cost_max": 18000,
+      "sample_size": 40, "data_year": 2025,
+      "source": "Approx. PM-JAY appendectomy package rate (national). Secondary sources; verify at nha.gov.in."
+    }
+  }
+}

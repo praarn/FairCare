@@ -1,10 +1,25 @@
 node_modules/
 .next/
 venv/
+.venv/
 __pycache__/
 *.pyc
-.env.local
 .DS_Store
-backend/app/data/users.json
-backend/app/data/sessions.json
-backend/app/data/reset_tokens.json
+
+# env files (never commit real secrets; *.example files ARE committed)
+.env
+.env.local
+backend/.env
+frontend/.env.local
+
+# python tooling
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# build artifacts
+*.tsbuildinfo
+
+# local sqlite scratch DBs used for smoke tests
+*.db

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { searchTreatments } from "@/lib/api";
 import { Treatment } from "@/lib/types";
 import { useLanguage } from "@/lib/language-context";
+import { useServerTranscription } from "@/lib/useServerTranscription";
 
 // Minimal ambient shape for the Web Speech API - not in default TS lib.
 interface SpeechRecognitionLike {
@@ -32,6 +33,12 @@ export default function TreatmentAutocomplete({
   const [voiceMatchNote, setVoiceMatchNote] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const serverTx = useServerTranscription(lang);
+
+  // The mic button appears if EITHER the browser's Web Speech API is available
+  // (primary) or the backend offers Groq transcription (fallback for Firefox etc).
+  const micAvailable = voiceSupported || serverTx.available;
+  const listening = isListening || serverTx.recording;
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -120,6 +127,21 @@ export default function TreatmentAutocomplete({
     setIsListening(false);
   }
 
+  function handleMicClick() {
+    if (voiceSupported) {
+      if (isListening) stopListening();
+      else startListening();
+      return;
+    }
+    // Groq fallback (browser has no Web Speech API)
+    if (serverTx.recording) {
+      serverTx.stop();
+    } else {
+      setVoiceMatchNote(null);
+      void serverTx.start((text) => void handleVoiceTranscript(text));
+    }
+  }
+
   return (
     <div className="relative">
       <label htmlFor="treatment-input" className="block text-sm font-medium text-ink mb-1.5">
@@ -142,17 +164,18 @@ export default function TreatmentAutocomplete({
           onFocus={() => setOpen(true)}
           className="w-full rounded-card border border-line bg-surface pl-4 pr-12 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-primary"
         />
-        {voiceSupported && (
+        {micAvailable && (
           <button
             type="button"
-            onClick={isListening ? stopListening : startListening}
-            aria-label={isListening ? t("search.listening") : t("search.voiceHint")}
+            onClick={handleMicClick}
+            disabled={serverTx.busy}
+            aria-label={listening ? t("search.listening") : t("search.voiceHint")}
             title={t("search.voiceHint")}
-            className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-              isListening ? "bg-alert text-white" : "bg-primary-light text-primary hover:bg-primary/20"
+            className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-colors disabled:opacity-60 ${
+              listening ? "bg-alert text-white" : "bg-primary-light text-primary hover:bg-primary/20"
             }`}
           >
-            {isListening ? (
+            {listening ? (
               <span aria-hidden className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
             ) : (
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden>
@@ -173,10 +196,15 @@ export default function TreatmentAutocomplete({
         )}
       </div>
 
-      {isListening && (
-        <p className="text-xs text-alert font-medium mt-1.5">{t("search.listening")}</p>
+      {listening && (
+        <p className="text-xs text-alert font-medium mt-1.5">
+          {serverTx.recording ? t("voice.recording") : t("search.listening")}
+        </p>
       )}
-      {!isListening && voiceMatchNote && (
+      {serverTx.busy && (
+        <p className="text-xs text-ink-soft font-medium mt-1.5">{t("voice.transcribing")}</p>
+      )}
+      {!listening && !serverTx.busy && voiceMatchNote && (
         <p className="text-xs text-primary font-medium mt-1.5">
           {t("search.matchedTo")} <span className="font-semibold">{voiceMatchNote}</span>
         </p>

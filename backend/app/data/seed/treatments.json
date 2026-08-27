@@ -234,5 +234,71 @@
     "typical_duration": "3-6 days admission",
     "description": "Hospitalization and supportive care for dengue fever, including platelet monitoring.",
     "symptoms": ["high fever with body ache", "low platelet count", "dengue diagnosed"]
+  },
+  {
+    "id": "t_turp_prostate",
+    "name": "Prostate Surgery (TURP)",
+    "name_hi": "प्रोस्टेट सर्जरी (टीयूआरपी)",
+    "category": "Urology",
+    "category_hi": "मूत्र रोग",
+    "aliases": ["transurethral resection of prostate", "prostate operation", "enlarged prostate surgery"],
+    "typical_duration": "2-3 days admission",
+    "description": "Endoscopic removal of prostate tissue for an enlarged prostate (benign prostatic hyperplasia).",
+    "symptoms": ["difficulty passing urine", "frequent urination at night", "weak urine stream", "enlarged prostate diagnosed"]
+  },
+  {
+    "id": "t_lasik",
+    "name": "LASIK Eye Surgery",
+    "name_hi": "लेसिक नेत्र सर्जरी",
+    "category": "Ophthalmology",
+    "category_hi": "नेत्र रोग",
+    "aliases": ["laser eye surgery", "lasik", "spectacle removal surgery"],
+    "typical_duration": "Day care, 1 day",
+    "description": "Laser reshaping of the cornea to correct short-sightedness, long-sightedness, or astigmatism.",
+    "symptoms": ["high spectacle power", "wants to remove glasses", "refractive error"]
+  },
+  {
+    "id": "t_diagnostic_angiography",
+    "name": "Coronary Angiography",
+    "name_hi": "कोरोनरी एंजियोग्राफी",
+    "category": "Cardiology",
+    "category_hi": "हृदय रोग",
+    "aliases": ["angiography", "cardiac catheterization", "CAG"],
+    "typical_duration": "Day care to 1 day",
+    "description": "A diagnostic dye study of the coronary arteries to check for blockages before deciding on angioplasty or bypass.",
+    "symptoms": ["chest pain on walking", "abnormal tmt test", "doctor advised angiography"]
+  },
+  {
+    "id": "t_gastroenteritis",
+    "name": "Acute Gastroenteritis Hospitalization",
+    "name_hi": "तीव्र आंत्रशोथ का इलाज",
+    "category": "General Medicine",
+    "category_hi": "सामान्य चिकित्सा",
+    "aliases": ["stomach infection admission", "loose motions hospitalization", "food poisoning treatment"],
+    "typical_duration": "2-4 days admission",
+    "description": "Hospitalization with IV fluids and medication for severe vomiting and diarrhoea with dehydration.",
+    "symptoms": ["severe vomiting and loose motions", "dehydration weakness", "stomach infection with fever"]
+  },
+  {
+    "id": "t_discectomy",
+    "name": "Spine Surgery (Discectomy)",
+    "name_hi": "रीढ़ की सर्जरी (डिस्केक्टॉमी)",
+    "category": "Orthopedics",
+    "category_hi": "हड्डी रोग",
+    "aliases": ["slip disc surgery", "lumbar discectomy", "microdiscectomy"],
+    "typical_duration": "3-5 days admission",
+    "description": "Surgical removal of a herniated (slipped) intervertebral disc pressing on a nerve.",
+    "symptoms": ["shooting pain from back to leg", "slip disc diagnosed", "numbness in leg with back pain"]
+  },
+  {
+    "id": "t_copd_exacerbation",
+    "name": "COPD / Asthma Exacerbation Admission",
+    "name_hi": "सीओपीडी / दमा के दौरे का इलाज",
+    "category": "Pulmonology",
+    "category_hi": "फेफड़ा रोग",
+    "aliases": ["breathing difficulty admission", "asthma attack hospitalization", "copd flare treatment"],
+    "typical_duration": "3-6 days admission",
+    "description": "Hospitalization with oxygen, nebulisation, and medication for a flare-up of chronic lung disease.",
+    "symptoms": ["severe breathlessness", "wheezing not settling", "known copd worsening"]
   }
 ]
