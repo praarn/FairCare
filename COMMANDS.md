@@ -19,6 +19,20 @@ The backend container automatically runs `alembic upgrade head` and seeds refere
 - API docs  → http://localhost:8000/docs
 - Health    → http://localhost:8000/api/health
 
+### Use the prebuilt images instead of building
+
+Every push to `main` publishes both services to GHCR
+(`.github/workflows/docker-publish.yml`):
+
+```bash
+docker pull ghcr.io/praarn/faircare-backend:latest
+docker pull ghcr.io/praarn/faircare-frontend:latest
+```
+
+Tags: `latest`, `sha-<short>`, and the semver on `v*` tags. Swap the
+`build:` keys in `docker-compose.yml` for `image: ghcr.io/praarn/faircare-<service>:latest`
+to run the stack without a local build.
+
 ### Manage the stack
 
 ```bash

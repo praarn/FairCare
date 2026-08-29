@@ -62,7 +62,7 @@ The multimodal layer does not change this. When you upload a photo of a bill, a 
 | Multimodal | Groq API (OpenAI-compatible) — vision model for OCR, Whisper for transcription |
 | Frontend | Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS 3 |
 | Auth | Cookie + bearer-token sessions, stdlib `hashlib.pbkdf2_hmac` (200k iterations), no external auth provider |
-| Ops | Docker + docker-compose, GitHub Actions CI, Makefile, structured JSON logging, per-request IDs, slowapi rate limiting |
+| Ops | Docker + docker-compose, GitHub Actions CI + GHCR image publishing, Makefile, structured JSON logging, per-request IDs, slowapi rate limiting |
 
 ---
 
@@ -83,6 +83,17 @@ The backend container runs `alembic upgrade head` and seeds the reference data b
 - Health → http://localhost:8000/api/health
 
 Common tasks are wrapped in the `Makefile` — `make help`, `make up`, `make down`, `make logs`, `make psql`, `make migrate`, `make seed`.
+
+### Prebuilt images
+
+Every push to `main` publishes both services to the GitHub Container Registry (`.github/workflows/docker-publish.yml`):
+
+```bash
+docker pull ghcr.io/praarn/faircare-backend:latest
+docker pull ghcr.io/praarn/faircare-frontend:latest
+```
+
+Tagged `latest`, `sha-<short>`, and — on `v*` tags — the semver. Point `docker-compose.yml` at these instead of `build:` to run without a local build.
 
 ---
 
