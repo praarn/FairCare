@@ -14,7 +14,7 @@ from starlette.types import ASGIApp
 
 from app.logging_config import get_logger
 
-log = get_logger("sahaj.http")
+log = get_logger("faircare.http")
 
 REQUEST_ID_HEADER = "X-Request-ID"
 

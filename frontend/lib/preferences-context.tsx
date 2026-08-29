@@ -28,7 +28,7 @@ export function PreferencesProvider({
   const setDataSaver = useCallback(
     (v: boolean) => {
       setDataSaverState(v);
-      document.cookie = `sahaj_datasaver=${v ? "1" : "0"}; path=/; max-age=31536000`;
+      document.cookie = `faircare_datasaver=${v ? "1" : "0"}; path=/; max-age=31536000`;
       router.refresh();
     },
     [router]
@@ -37,7 +37,7 @@ export function PreferencesProvider({
   const setLargeText = useCallback(
     (v: boolean) => {
       setLargeTextState(v);
-      document.cookie = `sahaj_textsize=${v ? "large" : "normal"}; path=/; max-age=31536000`;
+      document.cookie = `faircare_textsize=${v ? "large" : "normal"}; path=/; max-age=31536000`;
       router.refresh();
     },
     [router]

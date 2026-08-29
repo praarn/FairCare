@@ -29,7 +29,7 @@ Built as `output: "standalone"` so the Docker image ships a self-contained
 ## i18n
 
 8 languages (`en, hi, ta, te, bn, mr, gu, kn`), autonym labels. Current language
-lives in the `sahaj_lang` cookie, read server-side in `layout.tsx` via
+lives in the `faircare_lang` cookie, read server-side in `layout.tsx` via
 `parseLang`, and switched client-side through `lib/language-context.tsx`.
 
 ## Commands

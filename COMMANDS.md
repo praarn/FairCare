@@ -38,7 +38,7 @@ docker compose exec backend alembic upgrade head   # apply migrations
 docker compose exec backend alembic current        # show migration state
 docker compose exec backend python -m app.seed     # re-seed reference data
 docker compose exec backend python -m app.seed --fresh   # wipe + re-seed reference tables
-docker compose exec db psql -U sahaj -d sahaj      # psql shell
+docker compose exec db psql -U faircare -d faircare      # psql shell
 ```
 
 ### Grant a user admin access (contribution review)
@@ -49,7 +49,7 @@ docker compose exec db psql -U sahaj -d sahaj      # psql shell
 ```bash
 make admin email=you@example.com
 # or directly:
-docker compose exec db psql -U sahaj -d sahaj \
+docker compose exec db psql -U faircare -d faircare \
   -c "UPDATE users SET is_admin = true WHERE email = 'you@example.com';"
 ```
 

@@ -12,16 +12,16 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: sahaj
-          POSTGRES_PASSWORD: sahaj
-          POSTGRES_DB: sahaj_test
+          POSTGRES_USER: faircare
+          POSTGRES_PASSWORD: faircare
+          POSTGRES_DB: faircare_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U sahaj -d sahaj_test"
+          --health-cmd "pg_isready -U faircare -d faircare_test"
           --health-interval 5s --health-timeout 3s --health-retries 20
     env:
-      DATABASE_URL: postgresql+psycopg://sahaj:sahaj@localhost:5432/sahaj_test
+      DATABASE_URL: postgresql+psycopg://faircare:faircare@localhost:5432/faircare_test
       APP_ENV: development
       GROQ_API_KEY: ""
     defaults:

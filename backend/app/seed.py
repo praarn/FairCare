@@ -21,7 +21,7 @@ from app.db.session import SessionLocal
 from app.logging_config import configure_logging, get_logger
 
 SEED_DIR = Path(__file__).resolve().parent / "data" / "seed"
-log = get_logger("sahaj.seed")
+log = get_logger("faircare.seed")
 
 
 def _load(name: str):

@@ -225,7 +225,7 @@ const dict = {
   "share.whatsappTextIntro": { en: "Cost estimate for", hi: "के लिए लागत अनुमान", ta: "செலவு மதிப்பீடு", te: "ఖర్చు అంచనా", bn: "খরচের অনুমান", mr: "साठी खर्चाचा अंदाज", gu: "માટે ખર્ચનો અંદાજ", kn: "ವೆಚ್ಚದ ಅಂದಾಜು" },
   "share.whatsappTextTypical": { en: "Typical cost", hi: "सामान्य लागत", ta: "வழக்கமான செலவு", te: "సాధారణ ఖర్చు", bn: "সাধারণ খরচ", mr: "सामान्य खर्च", gu: "સામાન્ય ખર્ચ", kn: "ಸಾಮಾನ್ಯ ವೆಚ್ಚ" },
   "share.whatsappTextRange": { en: "Range", hi: "सीमा", ta: "வரம்பு", te: "పరిధి", bn: "পরিসর", mr: "श्रेणी", gu: "શ્રેણી", kn: "ವ್ಯಾಪ್ತಿ" },
-  "share.whatsappTextVia": { en: "via Sahaj Cost Estimate", hi: "सहज कॉस्ट एस्टिमेट के माध्यम से", ta: "Sahaj Cost Estimate வழியாக", te: "Sahaj Cost Estimate ద్వారా", bn: "Sahaj Cost Estimate এর মাধ্যমে", mr: "Sahaj Cost Estimate द्वारे", gu: "Sahaj Cost Estimate દ્વારા", kn: "Sahaj Cost Estimate ಮೂಲಕ" },
+  "share.whatsappTextVia": { en: "via FairCare", hi: "FairCare के माध्यम से", ta: "FairCare வழியாக", te: "FairCare ద్వారా", bn: "FairCare এর মাধ্যমে", mr: "FairCare द्वारे", gu: "FairCare દ્વારા", kn: "FairCare ಮೂಲಕ" },
   "readAloud.play": { en: "Read aloud", hi: "ज़ोर से पढ़ें", ta: "சத்தமாகப் படிக்கவும்", te: "గట్టిగా చదవండి", bn: "জোরে পড়ুন", mr: "मोठ्याने वाचा", gu: "મોટેથી વાંચો", kn: "ಜೋರಾಗಿ ಓದಿ" },
   "readAloud.stop": { en: "Stop", hi: "रोकें", ta: "நிறுத்து", te: "ఆపు", bn: "থামুন", mr: "थांबवा", gu: "અટકાવો", kn: "ನಿಲ್ಲಿಸಿ" },
   "readAloud.typicalCostIs": { en: "Typical cost is", hi: "सामान्य लागत है", ta: "வழக்கமான செலவு", te: "సాధారణ ఖర్చు", bn: "সাধারণ খরচ হলো", mr: "सामान्य खर्च आहे", gu: "સામાન્ય ખર્ચ છે", kn: "ಸಾಮಾನ್ಯ ವೆಚ್ಚ" },

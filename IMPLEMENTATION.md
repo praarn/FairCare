@@ -1,4 +1,4 @@
-# Healthcare Cost Predictor — Implementation Documentation
+# FairCare — Implementation Documentation
 
 A complete, ground-level account of how this project is built: every service, every
 endpoint, every table, every frontend page and component, the data pipeline, the
@@ -292,7 +292,7 @@ reads the optional `RATE_LIMIT_STORAGE_URI` directly).
 | `APP_ENV` | `development` | `production` stops `forgot-password` returning the reset token in the body |
 | `APP_VERSION` | `0.2.0` | Reported by `/api/health` and set as the FastAPI `version` |
 | `LOG_LEVEL` | `INFO` | Passed to `structlog.make_filtering_bound_logger` |
-| `DATABASE_URL` | `postgresql+psycopg://sahaj:sahaj@localhost:5432/sahaj` | SQLAlchemy URL; `sqlite`-prefixed values switch the engine kwargs (see §9) |
+| `DATABASE_URL` | `postgresql+psycopg://faircare:faircare@localhost:5432/faircare` | SQLAlchemy URL; `sqlite`-prefixed values switch the engine kwargs (see §9) |
 | `BACKEND_CORS_ORIGINS` | `localhost:3000`, `127.0.0.1:3000`, `[::1]:3000` | Accepts a **JSON list** or a plain **comma-separated string** — a `field_validator(mode="before")` with `NoDecode` handles both |
 | `SESSION_TTL_SECONDS` | `604800` (7 days) | `auth_sessions.expires_at` |
 | `RESET_TOKEN_TTL_SECONDS` | `3600` (1 hour) | `password_reset_tokens.expires_at` |
@@ -1036,8 +1036,8 @@ Next.js 16 App Router, React 19, TypeScript. Turbopack in dev; `output:
 
 **`app/layout.tsx`** (server):
 
-1. `await cookies()` → `initialLang` from `sahaj_lang` (via `parseLang`), auth token
-   from `sahaj_auth_token`.
+1. `await cookies()` → `initialLang` from `faircare_lang` (via `parseLang`), auth token
+   from `faircare_auth_token`.
 2. If a token exists, `await fetchMe(token)` server-side to hydrate `initialUser`
    (any failure → `null`, i.e. logged-out).
 3. Renders `<html lang={initialLang}>`, preconnects + loads Google Fonts
@@ -1045,7 +1045,7 @@ Next.js 16 App Router, React 19, TypeScript. Turbopack in dev; `output:
    `<Providers initialLang initialUser>`, and a header/footer. The footer text is the
    `footer.note` data-honesty line.
 
-`metadata` sets the title "Sahaj Cost Estimate — Healthcare Cost Predictor".
+`metadata` sets the title "FairCare — Healthcare Cost Estimate".
 
 ---
 
@@ -1089,9 +1089,9 @@ seeded from the server-fetched `initialLang` / `initialUser`.
 
 | Context | State | Persistence | On change |
 |---|---|---|---|
-| `language-context.tsx` | `lang: Lang`, `setLang`, `t(key)`, `hospitalTypeLabel(type)` | `sahaj_lang` cookie, `max-age` 1 year | `router.refresh()` so server components re-render in the new language |
-| `auth-context.tsx` | `user: User \| null`, `login`, `signup`, `logout` | `sahaj_auth_token` cookie, `max-age` 7 days (set/cleared via `document.cookie`) | `login`/`signup` → set cookie, set user, `router.push("/")` + `refresh()`; `logout` → best-effort `api.logout(token)`, clear cookie, `router.push("/login")` + `refresh()` |
-| `preferences-context.tsx` | `dataSaver`, `largeText` (+ setters) | `sahaj_datasaver` / `sahaj_textsize` cookies, 1 year | `router.refresh()` |
+| `language-context.tsx` | `lang: Lang`, `setLang`, `t(key)`, `hospitalTypeLabel(type)` | `faircare_lang` cookie, `max-age` 1 year | `router.refresh()` so server components re-render in the new language |
+| `auth-context.tsx` | `user: User \| null`, `login`, `signup`, `logout` | `faircare_auth_token` cookie, `max-age` 7 days (set/cleared via `document.cookie`) | `login`/`signup` → set cookie, set user, `router.push("/")` + `refresh()`; `logout` → best-effort `api.logout(token)`, clear cookie, `router.push("/login")` + `refresh()` |
+| `preferences-context.tsx` | `dataSaver`, `largeText` (+ setters) | `faircare_datasaver` / `faircare_textsize` cookies, 1 year | `router.refresh()` |
 
 `preferences-context` is defined and consumed by `SettingsMenu`, but the current
 `Header` renders only `LanguageDropdown` + the account controls (the settings-gear
@@ -1133,7 +1133,7 @@ exports `proxy` (the rename of `middleware`). It runs on every request except
 `_next/static`, `_next/image`, `favicon.ico` (the `config.matcher`).
 
 Logic: if the path starts with `/login`, `/signup`, `/forgot-password`, or
-`/reset-password` → allow. Otherwise, require the `sahaj_auth_token` cookie; if
+`/reset-password` → allow. Otherwise, require the `faircare_auth_token` cookie; if
 absent → `NextResponse.redirect("/login")`. (This is why an unauthenticated `curl /`
 returns a 307 to `/login`.)
 
@@ -1189,7 +1189,7 @@ auth routes and points the logo at `/login` there.
 currency:"INR", maximumFractionDigits:0})`.
 
 `lib/history.ts` — `getHistory()` / `addHistoryEntry()` / `clearHistory()` over
-`localStorage["sahaj_history"]`; de-dupes on `(treatment_id, city, hospital_type)`;
+`localStorage["faircare_history"]`; de-dupes on `(treatment_id, city, hospital_type)`;
 keeps the **15** most recent; every access is `try/catch` (private browsing / quota
 / disabled storage just no-ops).
 
@@ -1322,9 +1322,9 @@ image — use the bare-metal venv, or `make backend-test`).
 
 **`backend`** (`ubuntu-latest`, `working-directory: backend`):
 
-- Service container `postgres:16` (`sahaj/sahaj/sahaj_test`) with a `pg_isready`
+- Service container `postgres:16` (`faircare/faircare/faircare_test`) with a `pg_isready`
   health check.
-- `DATABASE_URL=postgresql+psycopg://sahaj:sahaj@localhost:5432/sahaj_test`,
+- `DATABASE_URL=postgresql+psycopg://faircare:faircare@localhost:5432/faircare_test`,
   `APP_ENV=development`, `GROQ_API_KEY=""`.
 - `setup-python@v5` (3.12, pip cache keyed on `requirements-dev.txt`) →
   `pip install -r requirements-dev.txt`.
@@ -1345,7 +1345,7 @@ image — use the bare-metal venv, or `make backend-test`).
 
 | Service | Image / build | Ports | Notes |
 |---|---|---|---|
-| `db` | `postgres:16-alpine` | `5432:5432` | env `POSTGRES_USER/PASSWORD/DB` (default `sahaj`); `pgdata` named volume; `pg_isready` healthcheck (5 s / 3 s / 20 retries) |
+| `db` | `postgres:16-alpine` | `5432:5432` | env `POSTGRES_USER/PASSWORD/DB` (default `faircare`); `pgdata` named volume; `pg_isready` healthcheck (5 s / 3 s / 20 retries) |
 | `backend` | `build ./backend` | `8000:8000` | `depends_on: db (service_healthy)`; `DATABASE_URL` points at `db:5432`; passes `APP_ENV`, `BACKEND_CORS_ORIGINS`, all `GROQ_*`, `LOG_LEVEL`, `WEB_CONCURRENCY` from the root `.env` |
 | `frontend` | `build ./frontend` (build-arg `NEXT_PUBLIC_API_BASE_URL`) | `3000:3000` | `depends_on: backend`; runtime env `API_INTERNAL_BASE_URL=http://backend:8000` for SSR fetches |
 

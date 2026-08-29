@@ -7,9 +7,9 @@
 | `i18n.ts` | `Lang` union + `LANGUAGES` + autonym `LANGUAGE_LABELS`, the translation tables, `t(lang, key)`, `parseLang`, `hospitalTypeLabel`. |
 | `format.ts` | `formatINR` (Intl `en-IN` currency) and other display formatters. |
 | `history.ts` | `HistoryEntry` type + `localStorage` read/write for recently-viewed estimates (client-only). |
-| `token.ts` | Reads the `sahaj_auth_token` cookie client-side. Kept standalone so small client islands (Save button, admin page) can authenticate their own fetches without importing the whole auth context. |
-| `auth-context.tsx` | `"use client"` React context: current user, `login`/`logout`/`signup`, writes the `sahaj_auth_token` cookie. |
-| `language-context.tsx` | `"use client"` context: current `Lang`, `t()` bound to it, writes the `sahaj_lang` cookie and refreshes the route on change. |
+| `token.ts` | Reads the `faircare_auth_token` cookie client-side. Kept standalone so small client islands (Save button, admin page) can authenticate their own fetches without importing the whole auth context. |
+| `auth-context.tsx` | `"use client"` React context: current user, `login`/`logout`/`signup`, writes the `faircare_auth_token` cookie. |
+| `language-context.tsx` | `"use client"` context: current `Lang`, `t()` bound to it, writes the `faircare_lang` cookie and refreshes the route on change. |
 | `preferences-context.tsx` | `"use client"` context: data-saver toggle and other UI preferences. |
 | `useServerTranscription.ts` | `"use client"` hook: `MediaRecorder` → `POST /api/multimodal/transcribe` (Groq Whisper), used as the voice fallback when the browser has no Web Speech API. |
 

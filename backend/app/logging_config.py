@@ -62,5 +62,5 @@ def configure_logging() -> None:
     _configured = True
 
 
-def get_logger(name: str = "sahaj"):
+def get_logger(name: str = "faircare"):
     return structlog.get_logger(name)

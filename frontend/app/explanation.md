@@ -2,8 +2,8 @@
 
 One folder per route segment. `page.tsx` is the route; `layout.tsx` (this
 folder's root) wraps every page with `<Header>`, the context `<Providers>`, and
-does the SSR `fetchMe()` for the logged-in user using the `sahaj_auth_token`
-cookie. Language comes from the `sahaj_lang` cookie via `parseLang`.
+does the SSR `fetchMe()` for the logged-in user using the `faircare_auth_token`
+cookie. Language comes from the `faircare_lang` cookie via `parseLang`.
 
 Most pages are React Server Components that fetch from the backend during SSR and
 mount a small client island for interactivity.

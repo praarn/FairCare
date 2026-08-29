@@ -23,7 +23,7 @@ export default async function ResultsPage({
 }) {
   const { treatment_id, city, state, hospital_type } = await searchParams;
   const cookieStore = await cookies();
-  const lang = parseLang(cookieStore.get("sahaj_lang")?.value);
+  const lang = parseLang(cookieStore.get("faircare_lang")?.value);
 
   if (!treatment_id || (!city && !state)) {
     return (

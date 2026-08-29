@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     # ----- database -----
     # Default points at the docker-compose service; override for bare-metal.
     database_url: str = Field(
-        default="postgresql+psycopg://sahaj:sahaj@localhost:5432/sahaj"
+        default="postgresql+psycopg://faircare:faircare@localhost:5432/faircare"
     )
 
     # ----- CORS -----

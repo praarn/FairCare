@@ -26,7 +26,7 @@ from app.routers import (
 )
 
 configure_logging()
-log = get_logger("sahaj.app")
+log = get_logger("faircare.app")
 
 
 def _db_ok() -> bool:
@@ -54,7 +54,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Healthcare Cost Predictor API",
+    title="FairCare API",
     description=(
         "Rule-based cost estimation, hospital lookup, and scheme eligibility, "
         "now backed by Postgres. Multimodal helpers (bill-photo OCR, voice "
@@ -160,7 +160,7 @@ def ready():
 @app.get("/")
 def root():
     return {
-        "service": "Healthcare Cost Predictor API",
+        "service": "FairCare API",
         "docs": "/docs",
         "health": "/api/health",
     }

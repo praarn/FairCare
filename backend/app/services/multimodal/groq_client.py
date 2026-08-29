@@ -19,7 +19,7 @@ import httpx
 from app.config import settings
 from app.logging_config import get_logger
 
-log = get_logger("sahaj.groq")
+log = get_logger("faircare.groq")
 
 
 class GroqUnavailable(RuntimeError):

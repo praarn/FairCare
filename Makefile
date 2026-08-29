@@ -1,4 +1,4 @@
-# Healthcare Cost Predictor — common tasks.
+# FairCare — common tasks.
 # `make help` lists everything.
 
 COMPOSE ?= docker compose
@@ -31,7 +31,7 @@ ps: ## Show container status
 	$(COMPOSE) ps
 
 psql: ## Open a psql shell in the db container
-	$(COMPOSE) exec db psql -U $${POSTGRES_USER:-sahaj} -d $${POSTGRES_DB:-sahaj}
+	$(COMPOSE) exec db psql -U $${POSTGRES_USER:-faircare} -d $${POSTGRES_DB:-faircare}
 
 migrate: ## Run alembic migrations inside the backend container
 	$(COMPOSE) exec backend alembic upgrade head
@@ -40,7 +40,7 @@ seed: ## Re-run the seed loader inside the backend container
 	$(COMPOSE) exec backend $(PY) -m app.seed
 
 admin: ## Grant admin (contribution review) to a user:  make admin email=you@example.com
-	$(COMPOSE) exec db psql -U $${POSTGRES_USER:-sahaj} -d $${POSTGRES_DB:-sahaj} \
+	$(COMPOSE) exec db psql -U $${POSTGRES_USER:-faircare} -d $${POSTGRES_DB:-faircare} \
 		-c "UPDATE users SET is_admin = true WHERE email = '$(email)';"
 
 ## ---------- backend (bare metal) ----------

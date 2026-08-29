@@ -11,7 +11,7 @@ export default async function HospitalDetailPage({
 }) {
   const { id } = await params;
   const cookieStore = await cookies();
-  const lang = parseLang(cookieStore.get("sahaj_lang")?.value);
+  const lang = parseLang(cookieStore.get("faircare_lang")?.value);
 
   let hospital;
   try {

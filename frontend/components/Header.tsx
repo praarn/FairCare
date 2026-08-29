@@ -22,10 +22,10 @@ export default function Header() {
             aria-hidden
             className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-display text-lg"
           >
-            स
+            F
           </span>
           <span className="font-display text-xl font-semibold text-ink hidden sm:inline">
-            Sahaj Cost Estimate
+            FairCare
           </span>
         </Link>
 

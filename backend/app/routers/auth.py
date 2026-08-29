@@ -18,7 +18,7 @@ from app.schemas import (
 from app.services import auth_service
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
-log = get_logger("sahaj.auth")
+log = get_logger("faircare.auth")
 
 
 def _extract_token(authorization: str | None) -> str:

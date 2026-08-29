@@ -1,6 +1,6 @@
-# Healthcare Cost Predictor
+# FairCare
 
-A web app that helps people in India estimate the cost of a medical treatment, compare that cost across cities, check government health-scheme eligibility, find hospitals (government / empanelled options surfaced first), and get a rough diagnosis lead from a symptom description — built on transparent, rule-based logic over a real database, with optional **multimodal** input (photograph a hospital bill, or speak instead of type).
+A web app that helps people in India face a medical bill fairly: estimate what a treatment *should* cost, check a hospital bill photo against that estimate (within / above / below), compare costs across cities, check government health-scheme eligibility, find hospitals (government / empanelled options surfaced first), plan payment, and get a rough diagnosis lead from a symptom description — built on transparent, rule-based logic over a real database, with optional **multimodal** input (photograph a hospital bill, or speak instead of type).
 
 > **Data honesty:** all seed cost figures are **sample data**, clearly labelled in the `source` field of every record — they are model-derived from a base-rate table, not scraped from real invoices, and not verified CGHS/PM-JAY figures. National reference rates are rounded approximations from secondary sources; verify at `nha.gov.in` before relying on them.
 
@@ -159,7 +159,7 @@ All config is environment-driven (`backend/app/config.py`). Key variables:
 
 | Variable | Default | Notes |
 |---|---|---|
-| `DATABASE_URL` | `postgresql+psycopg://sahaj:sahaj@localhost:5432/sahaj` | SQLAlchemy URL |
+| `DATABASE_URL` | `postgresql+psycopg://faircare:faircare@localhost:5432/faircare` | SQLAlchemy URL |
 | `APP_ENV` | `development` | `production` stops `forgot-password` returning the reset token in the body |
 | `BACKEND_CORS_ORIGINS` | localhost:3000 variants | Comma-separated or a JSON list |
 | `GROQ_API_KEY` | *(empty)* | Empty disables the multimodal features (clean degradation) |

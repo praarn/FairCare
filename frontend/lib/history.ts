@@ -6,7 +6,7 @@ export interface HistoryEntry {
   viewed_at: number;
 }
 
-const KEY = "sahaj_history";
+const KEY = "faircare_history";
 const MAX_ENTRIES = 15;
 
 export function getHistory(): HistoryEntry[] {

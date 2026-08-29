@@ -10,7 +10,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get("sahaj_auth_token")?.value;
+  const token = request.cookies.get("faircare_auth_token")?.value;
   if (!token) {
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);

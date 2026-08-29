@@ -8,16 +8,16 @@ import { fetchMe } from "@/lib/api";
 import { User } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Sahaj Cost Estimate — Healthcare Cost Predictor",
+  title: "FairCare — Healthcare Cost Estimate",
   description:
     "Estimate treatment costs from verified data and find affordable, legitimate care options nearby.",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
-  const initialLang = parseLang(cookieStore.get("sahaj_lang")?.value);
+  const initialLang = parseLang(cookieStore.get("faircare_lang")?.value);
 
-  const token = cookieStore.get("sahaj_auth_token")?.value;
+  const token = cookieStore.get("faircare_auth_token")?.value;
   let initialUser: User | null = null;
   if (token) {
     try {

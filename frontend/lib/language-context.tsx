@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Lang, t as translate, TranslationKey, hospitalTypeLabel } from "./i18n";
 
-const COOKIE_NAME = "sahaj_lang";
+const COOKIE_NAME = "faircare_lang";
 
 type LanguageContextValue = {
   lang: Lang;

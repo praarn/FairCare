@@ -13,7 +13,7 @@ export default async function HospitalsPage({
   const { treatment_id, city, type, budget_mode } = await searchParams;
   const isBudgetMode = budget_mode === "true";
   const cookieStore = await cookies();
-  const lang = parseLang(cookieStore.get("sahaj_lang")?.value);
+  const lang = parseLang(cookieStore.get("faircare_lang")?.value);
 
   if (!treatment_id) {
     return (

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { User } from "./types";
 import * as api from "./api";
 
-const TOKEN_COOKIE = "sahaj_auth_token";
+const TOKEN_COOKIE = "faircare_auth_token";
 
 type AuthContextValue = {
   user: User | null;
