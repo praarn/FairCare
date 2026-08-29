@@ -1,11 +1,13 @@
 # FairCare
 
-[![CI](https://github.com/praarn/faircare/actions/workflows/ci.yml/badge.svg)](https://github.com/praarn/faircare/actions/workflows/ci.yml)
+[![CI](https://github.com/praarn/FairCare/actions/workflows/ci.yml/badge.svg)](https://github.com/praarn/FairCare/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
 ![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 ![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+
+**Know what a treatment *should* cost in India — and whether a hospital bill is fair — before you pay.** Rule-based cost estimates over a real database (no LLM ever invents a number), bill-photo fairness checks, government-scheme eligibility, a government-first hospital finder, and payment planning, in 8 languages.
 
 A web app that helps people in India face a medical bill fairly: estimate what a treatment *should* cost, check a hospital bill photo against that estimate (within / above / below), compare costs across cities, check government health-scheme eligibility, find hospitals (government / empanelled options surfaced first), plan payment, and get a rough diagnosis lead from a symptom description — built on transparent, rule-based logic over a real database, with optional **multimodal** input (photograph a hospital bill, or speak instead of type).
 
