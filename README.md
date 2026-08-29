@@ -1,10 +1,25 @@
 # FairCare
 
+[![CI](https://github.com/praarn/faircare/actions/workflows/ci.yml/badge.svg)](https://github.com/praarn/faircare/actions/workflows/ci.yml)
+![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
+![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+
 A web app that helps people in India face a medical bill fairly: estimate what a treatment *should* cost, check a hospital bill photo against that estimate (within / above / below), compare costs across cities, check government health-scheme eligibility, find hospitals (government / empanelled options surfaced first), plan payment, and get a rough diagnosis lead from a symptom description — built on transparent, rule-based logic over a real database, with optional **multimodal** input (photograph a hospital bill, or speak instead of type).
 
 > **Data honesty:** all seed cost figures are **sample data**, clearly labelled in the `source` field of every record — they are model-derived from a base-rate table, not scraped from real invoices, and not verified CGHS/PM-JAY figures. National reference rates are rounded approximations from secondary sources; verify at `nha.gov.in` before relying on them.
 
-`Python` `FastAPI` `SQLAlchemy 2` `Alembic` `PostgreSQL` `Pydantic v2` `Groq` `Next.js 16` `React 19` `TypeScript` `Tailwind CSS` `Docker`
+---
+
+## Screenshots
+
+| Landing — name the treatment and your city | Result — tiered estimate with a confidence score |
+|---|---|
+| ![FairCare landing page](.github/assets/screenshot-home.jpg) | ![Cost estimate result with confidence gauge](.github/assets/screenshot-estimate.jpg) |
+| **Hospitals — government / empanelled options first** | **Scheme eligibility — with plain-language reasons** |
+| ![Hospital finder, government-first ranking](.github/assets/screenshot-hospitals.jpg) | ![Government scheme eligibility check](.github/assets/screenshot-eligibility.jpg) |
 
 ---
 
