@@ -1,5 +1,6 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]  # let bare `pytest` (CI) import `app`, same as `python -m pytest`
 addopts = "-q"
 filterwarnings = [
     "ignore::DeprecationWarning:starlette.*",
