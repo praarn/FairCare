@@ -304,7 +304,7 @@ reads the optional `RATE_LIMIT_STORAGE_URI` directly).
 | `GROQ_BASE_URL` | `https://api.groq.com/openai/v1` | OpenAI-compatible base |
 | `GROQ_VISION_MODEL` | `meta-llama/llama-4-scout-17b-16e-instruct` | Bill-photo OCR model |
 | `GROQ_TRANSCRIBE_MODEL` | `whisper-large-v3-turbo` | Voice transcription model |
-| `GROQ_TEXT_MODEL` | `llama-3.3-70b-versatile` | Declared in config/compose; not currently called by any service |
+| `GROQ_TEXT_MODEL` | `llama-3.3-70b-versatile` | Text model behind the estimate explainer (`chat_text`, see §38) |
 | `GROQ_TIMEOUT_SECONDS` | `45.0` | `httpx` client timeout |
 | `MAX_UPLOAD_MB_IMAGE` | `10` | Bill photo guard |
 | `MAX_UPLOAD_MB_AUDIO` | `25` | Audio clip guard |
@@ -1447,8 +1447,6 @@ compose`, `PY ?= python` are overridable.
   service); in `APP_ENV=production` it is only logged.
 - **History is local-only** — `localStorage`, not synced to an account or the
   backend, capped at 15 entries.
-- **`GROQ_TEXT_MODEL`** is configured and passed through compose but not currently
-  called by any service (reserved for a future text helper).
 - Sync SQLAlchemy + threadpool is fine for this scale; a high-QPS deployment would
   want async drivers or more workers behind a shared rate-limit store.
 
